@@ -12,6 +12,7 @@
   <description>Wallet Service</description>
 
   <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <java.version>17</java.version>
     <lombok.version>1.18.26</lombok.version>
     <junit.version>5.9.1</junit.version>
