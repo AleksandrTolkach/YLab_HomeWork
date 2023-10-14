@@ -22,6 +22,7 @@
     <junit.surefire.version>1.2.0</junit.surefire.version>
     <maven.jar.plugin.version>3.2.0</maven.jar.plugin.version>
     <maven.wrapper.version>3.2.0</maven.wrapper.version>
+    <assertJ.version>3.23.1</assertJ.version>
   </properties>
 
   <dependencies>
@@ -45,10 +46,18 @@
       <version>${mockito.version}</version>
       <scope>test</scope>
     </dependency>
+
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-inline</artifactId>
       <version>${mockito.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <version>${assertJ.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -62,7 +71,7 @@
         <configuration>
           <archive>
             <manifest>
-              <mainClass>by.toukach.walletservice.application.in.WalletService</mainClass>
+              <mainClass>by.toukach.walletservice.controller.in.WalletService</mainClass>
             </manifest>
           </archive>
         </configuration>
