@@ -1,16 +1,16 @@
 package by.toukach.walletservice;
 
-import by.toukach.walletservice.domain.models.AccountDto;
-import by.toukach.walletservice.domain.models.LogInDto;
-import by.toukach.walletservice.domain.models.SignUpDto;
-import by.toukach.walletservice.domain.models.TransactionDto;
-import by.toukach.walletservice.domain.models.UserDto;
+import by.toukach.walletservice.dto.AccountDto;
+import by.toukach.walletservice.dto.LogInDto;
+import by.toukach.walletservice.dto.SignUpDto;
+import by.toukach.walletservice.dto.TransactionDto;
+import by.toukach.walletservice.dto.UserDto;
+import by.toukach.walletservice.entity.Account;
+import by.toukach.walletservice.entity.Log;
+import by.toukach.walletservice.entity.Transaction;
+import by.toukach.walletservice.entity.User;
 import by.toukach.walletservice.enumiration.LogType;
 import by.toukach.walletservice.enumiration.TransactionType;
-import by.toukach.walletservice.infrastructure.entity.AccountEntity;
-import by.toukach.walletservice.infrastructure.entity.Log;
-import by.toukach.walletservice.infrastructure.entity.TransactionEntity;
-import by.toukach.walletservice.infrastructure.entity.UserEntity;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,28 +39,28 @@ public class BaseTest {
   protected static final Long LOG_ID = 2L;
   protected static final Double VALUE_BIG_AMOUNT = 100000D;
 
-  protected UserEntity getNewUserEntity() {
-    return UserEntity.builder()
+  protected User getNewUserEntity() {
+    return User.builder()
         .login(LOGIN)
         .password(PASSWORD)
         .accountList(new ArrayList<>())
         .build();
   }
 
-  protected UserEntity getCreatedUserEntity() {
-    UserEntity userEntity = getNewUserEntity();
-    userEntity.setId(USER_ID);
-    return userEntity;
+  protected User getCreatedUserEntity() {
+    User user = getNewUserEntity();
+    user.setId(USER_ID);
+    return user;
   }
 
-  protected UserEntity getUpdatedUserEntity() {
-    UserEntity userEntity = getCreatedUserEntity();
-    userEntity.setAccountList(List.of(getCreatedAccountEntity()));
-    return userEntity;
+  protected User getUpdatedUserEntity() {
+    User user = getCreatedUserEntity();
+    user.setAccountList(List.of(getCreatedAccountEntity()));
+    return user;
   }
 
-  protected UserEntity getAdminEntity() {
-    return UserEntity.builder()
+  protected User getAdminEntity() {
+    return User.builder()
         .id(ADMIN_ID)
         .login(ADMIN_LOGIN)
         .password(ADMIN_PASSWORD)
@@ -99,21 +99,21 @@ public class BaseTest {
     return userDto;
   }
 
-  protected AccountEntity getNewAccountEntity() {
-    return AccountEntity.builder()
+  protected Account getNewAccountEntity() {
+    return Account.builder()
         .title(ACCOUNT_TITLE)
         .sum(ACCOUNT_SUM)
         .build();
   }
 
-  protected AccountEntity getCreatedAccountEntity() {
-    AccountEntity accountEntity = getNewAccountEntity();
-    accountEntity.setId(ACCOUNT_ID);
-    return accountEntity;
+  protected Account getCreatedAccountEntity() {
+    Account account = getNewAccountEntity();
+    account.setId(ACCOUNT_ID);
+    return account;
   }
 
-  protected AccountEntity getUpdatedAccountEntity() {
-    AccountEntity account = getCreatedAccountEntity();
+  protected Account getUpdatedAccountEntity() {
+    Account account = getCreatedAccountEntity();
     account.setSum(ACCOUNT_SUM + TRANSACTION_VALUE);
     return account;
   }
@@ -182,8 +182,8 @@ public class BaseTest {
         .build();
   }
 
-  protected TransactionEntity getTransactionEntity() {
-    return TransactionEntity.builder()
+  protected Transaction getTransactionEntity() {
+    return Transaction.builder()
         .id(TRANSACTION_ID)
         .type(TransactionType.CREDIT)
         .userId(USER_ID)

@@ -1,7 +1,7 @@
 package by.toukach.walletservice.utils;
 
+import by.toukach.walletservice.entity.Log;
 import by.toukach.walletservice.enumiration.LogType;
-import by.toukach.walletservice.infrastructure.entity.Log;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
