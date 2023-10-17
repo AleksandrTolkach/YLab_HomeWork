@@ -1,5 +1,6 @@
 package by.toukach.walletservice.dto;
 
+import java.time.LocalDateTime;
 import lombok.Builder;
 import lombok.Data;
 
@@ -11,6 +12,8 @@ import lombok.Data;
 public class AccountDto {
 
   private Long id;
+  private LocalDateTime createdAt;
   private String title;
   private Double sum;
+  private Long userId;
 }

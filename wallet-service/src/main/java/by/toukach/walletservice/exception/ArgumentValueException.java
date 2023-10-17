@@ -1,4 +1,4 @@
-package by.toukach.walletservice.exceptions;
+package by.toukach.walletservice.exception;
 
 /**
  * Клас представляющий исключение, выбрасываемое при некорректно переданных данных в метод.

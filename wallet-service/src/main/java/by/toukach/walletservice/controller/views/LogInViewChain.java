@@ -3,8 +3,8 @@ package by.toukach.walletservice.controller.views;
 import by.toukach.walletservice.dto.LogInDto;
 import by.toukach.walletservice.dto.LogInDto.LogInDtoBuilder;
 import by.toukach.walletservice.dto.UserDto;
-import by.toukach.walletservice.exceptions.EntityNotFoundException;
-import by.toukach.walletservice.exceptions.ExceptionMessage;
+import by.toukach.walletservice.exception.EntityNotFoundException;
+import by.toukach.walletservice.exception.ExceptionMessage;
 import by.toukach.walletservice.service.AuthService;
 import by.toukach.walletservice.service.impl.AuthServiceImpl;
 import java.util.Scanner;
@@ -13,6 +13,8 @@ import java.util.Scanner;
  * Класс для вывода формы входа в консоль.
  * */
 public class LogInViewChain extends ViewChain {
+
+  private static final String ADMIN_LOGIN = "admin";
 
   private final AuthService authService;
 
@@ -35,7 +37,7 @@ public class LogInViewChain extends ViewChain {
       UserDto userDto = authService.logIn(logInDtoBuilder.build());
       setUserDto(userDto);
 
-      if (userDto.getLogin().equals("admin")) {
+      if (userDto.getLogin().equals(ADMIN_LOGIN)) {
         setNextViewChain(new AdminActionViewChain(userDto));
       } else {
         setNextViewChain(new AccountActionViewChain(getUserDto()));

@@ -12,6 +12,11 @@ public class AccountActionViewChain extends ViewChain {
 
   private final Map<Integer, ViewChain> viewChainMap = new HashMap<>();
 
+  /**
+   * Конструктор для создания формы со списком действий.
+   *
+   * @param userDto пользователь, который выполняет запрос.
+   */
   public AccountActionViewChain(UserDto userDto) {
     setUserDto(userDto);
     viewChainMap.put(1, new CreateAccountViewChain(getUserDto()));

@@ -16,6 +16,12 @@ public class SpecificAccountViewChain extends AccountViewChain {
 
   private final Map<Integer, ViewChain> viewChainMap = new HashMap<>();
 
+  /**
+   * Конструктор для создания формы с данными о счете.
+   *
+   * @param accountDto запрашиваемый счет.
+   * @param userDto пользователь, который выполняет запрос.
+   */
   public SpecificAccountViewChain(AccountDto accountDto, UserDto userDto) {
     setAccountDto(accountDto);
     viewChainMap.put(1, new CreditAccountViewChain(accountDto, userDto));

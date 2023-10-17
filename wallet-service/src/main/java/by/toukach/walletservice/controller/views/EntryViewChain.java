@@ -11,6 +11,9 @@ public class EntryViewChain extends ViewChain {
 
   private final Map<Integer, ViewChain> viewChainMap = new HashMap<>();
 
+  /**
+   * Конструктор для создания начальной формы.
+   */
   public EntryViewChain() {
     viewChainMap.put(1, new LogInViewChain());
     viewChainMap.put(2, new SignUpViewChain());

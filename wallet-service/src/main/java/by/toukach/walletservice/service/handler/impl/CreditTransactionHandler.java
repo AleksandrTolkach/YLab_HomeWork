@@ -5,8 +5,8 @@ import by.toukach.walletservice.dto.TransactionDto;
 import by.toukach.walletservice.entity.Log;
 import by.toukach.walletservice.enumiration.LogType;
 import by.toukach.walletservice.enumiration.TransactionType;
-import by.toukach.walletservice.exceptions.ArgumentValueException;
-import by.toukach.walletservice.exceptions.ExceptionMessage;
+import by.toukach.walletservice.exception.ArgumentValueException;
+import by.toukach.walletservice.exception.ExceptionMessage;
 import by.toukach.walletservice.service.AccountService;
 import by.toukach.walletservice.service.LoggerService;
 import by.toukach.walletservice.service.TransactionService;
@@ -25,6 +25,9 @@ public class CreditTransactionHandler implements TransactionHandler {
   private final AccountService accountService;
   private final LoggerService loggerService;
 
+  /**
+   * Конструктор для создания обработчика транзакций по начислению средств.
+   */
   public CreditTransactionHandler() {
     transactionService = TransactionServiceImpl.getInstance();
     accountService = AccountServiceImpl.getInstance();

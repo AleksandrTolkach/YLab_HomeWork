@@ -19,6 +19,7 @@ public class TransactionConverter implements Converter<Transaction, TransactionD
   public Transaction toEntity(TransactionDto dto) {
     return Transaction.builder()
         .id(dto.getId())
+        .createdAt(dto.getCreatedAt())
         .type(dto.getType())
         .userId(dto.getUserId())
         .accountId(dto.getAccountId())
@@ -30,6 +31,7 @@ public class TransactionConverter implements Converter<Transaction, TransactionD
   public TransactionDto toDto(Transaction entity) {
     return TransactionDto.builder()
         .id(entity.getId())
+        .createdAt(entity.getCreatedAt())
         .type(entity.getType())
         .userId(entity.getUserId())
         .accountId(entity.getAccountId())

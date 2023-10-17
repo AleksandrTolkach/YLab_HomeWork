@@ -13,7 +13,7 @@ public class ViewMessage {
       "Выберите действие:\n1.Создать счет\n2.Действие над существующим счетом\n"
           + "3.История\n4.На главную\n5.Выйти";
   public static final String ADMIN_ACTION_LIST =
-      "Выберите действие:\n1.Просмотреть логи\n2.Выйти";
+      "Выберите действие:\n1.Просмотреть логи\n2.Выйти\n3.Завершить работу приложения";
   public static final String ACCOUNT_NUMBER = "Введите название счета";
   public static final String ENTRY =
       "Приветствуем!\nВыберите действие:\n1.Войти\n2.Зарегистрироваться\n3.Выйти";
@@ -34,4 +34,5 @@ public class ViewMessage {
   public static final String TABLE_ENTRY = "%s | %s | %s | %s | %n";
   public static final String LOG_TABLE_HEADER = "тип | сообщение | время | %n-------------------%n";
   public static final String LOG_TABLE_ENTRY = "%s | %s | %s | %n";
+  public static final String BYE = "Всего доброго!";
 }

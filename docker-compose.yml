@@ -1,0 +1,24 @@
+version: '3.5'
+services:
+  db:
+    build: postgresql
+    image: wallet_postgresql:1.0.0
+    restart: always
+    env_file:
+      - postgresql/db.env
+    ports:
+      - "5434:5432"
+    networks:
+      - wallet-service
+
+  ryuk:
+    image: testcontainers/ryuk
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - wallet-service
+
+networks:
+  wallet-service:
+    name: wallet-service

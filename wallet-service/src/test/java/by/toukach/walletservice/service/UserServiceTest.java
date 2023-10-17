@@ -14,14 +14,13 @@ import by.toukach.walletservice.entity.User;
 import by.toukach.walletservice.entity.converter.Converter;
 import by.toukach.walletservice.entity.converter.impl.AccountConverter;
 import by.toukach.walletservice.entity.converter.impl.UserConverter;
-import by.toukach.walletservice.exceptions.EntityDuplicateException;
-import by.toukach.walletservice.exceptions.EntityNotFoundException;
+import by.toukach.walletservice.exception.EntityDuplicateException;
+import by.toukach.walletservice.exception.EntityNotFoundException;
 import by.toukach.walletservice.repository.UserRepository;
 import by.toukach.walletservice.repository.impl.UserRepositoryImpl;
 import by.toukach.walletservice.service.impl.UserServiceImpl;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -62,11 +61,11 @@ public class UserServiceTest extends BaseTest {
     newUserDto = getNewUserDto();
     createdUserDto = getCreatedUserDto();
     updatedUserDto = getUpdatedUserDto();
-    newUser = getNewUserEntity();
-    createdUser = getCreatedUserEntity();
-    updatedUser = getUpdatedUserEntity();
+    newUser = getNewUser();
+    createdUser = getCreatedUser();
+    updatedUser = getUpdatedUser();
     accountDto = getCreatedAccountDto();
-    account = getCreatedAccountEntity();
+    account = getCreatedAccount();
 
     userRepositoryMock = mockStatic(UserRepositoryImpl.class);
     userRepositoryMock.when(UserRepositoryImpl::getInstance).thenReturn(userRepository);
@@ -103,7 +102,7 @@ public class UserServiceTest extends BaseTest {
     UserDto expectedResult = createdUserDto;
     UserDto actualResult = userService.createUser(newUserDto);
 
-    assertThat(expectedResult).isEqualTo(actualResult);
+    assertThat(actualResult).isEqualTo(expectedResult);
   }
 
   @Test
@@ -124,7 +123,7 @@ public class UserServiceTest extends BaseTest {
     UserDto expectedResult = createdUserDto;
     UserDto actualResult = userService.findUserById(USER_ID);
 
-    assertThat(expectedResult).isEqualTo(actualResult);
+    assertThat(actualResult).isEqualTo(expectedResult);
   }
 
   @Test
@@ -145,7 +144,7 @@ public class UserServiceTest extends BaseTest {
     UserDto expectedResult = createdUserDto;
     UserDto actualResult = userService.findUserByLogin(LOGIN);
 
-    assertThat(expectedResult).isEqualTo(actualResult);
+    assertThat(actualResult).isEqualTo(expectedResult);
   }
 
   @Test
@@ -155,31 +154,6 @@ public class UserServiceTest extends BaseTest {
         .thenThrow(EntityNotFoundException.class);
 
     assertThatThrownBy(() -> userService.findUserByLogin(UN_EXISTING_LOGIN))
-        .isInstanceOf(EntityNotFoundException.class);
-  }
-
-  @Test
-  @DisplayName("Тест обновления пользователя в приложении")
-  public void updateUserTest_should_UpdateUser() {
-    when(userRepository.findUserById(USER_ID)).thenReturn(createdUser);
-    when(accountConverter.toEntity(accountDto)).thenReturn(account);
-    when(userConverter.toDto(updatedUser)).thenReturn(updatedUserDto);
-
-    UserDto expectedResult = updatedUserDto;
-    createdUserDto.setAccountList(List.of(accountDto));
-    UserDto actualResult = userService.updateUser(createdUserDto);
-
-    assertThat(expectedResult).isEqualTo(actualResult);
-  }
-
-  @Test
-  @DisplayName("Тест по обновлению несуществующего пользователя в приложении")
-  public void updateUserTest_should_ThrowError_WhenUserNotFound() {
-    UserDto createdUserDto = getCreatedUserDto();
-
-    createdUserDto.setId(UN_EXISTING_ID);
-
-    assertThatThrownBy(() -> userService.updateUser(createdUserDto))
         .isInstanceOf(EntityNotFoundException.class);
   }
 }
