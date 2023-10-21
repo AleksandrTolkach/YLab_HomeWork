@@ -11,8 +11,8 @@ import by.toukach.walletservice.dto.LogInDto;
 import by.toukach.walletservice.dto.SignUpDto;
 import by.toukach.walletservice.dto.UserDto;
 import by.toukach.walletservice.entity.Log;
-import by.toukach.walletservice.exceptions.EntityDuplicateException;
-import by.toukach.walletservice.exceptions.EntityNotFoundException;
+import by.toukach.walletservice.exception.EntityDuplicateException;
+import by.toukach.walletservice.exception.EntityNotFoundException;
 import by.toukach.walletservice.service.impl.AuthServiceImpl;
 import by.toukach.walletservice.service.impl.LoggerServiceImpl;
 import by.toukach.walletservice.service.impl.UserServiceImpl;
@@ -85,7 +85,7 @@ public class AuthServiceTest extends BaseTest {
     UserDto expectedResult = createdUser;
     UserDto actualResult = authService.logIn(logIn);
 
-    assertThat(expectedResult).isEqualTo(actualResult);
+    assertThat(actualResult).isEqualTo(expectedResult);
   }
 
   @Test
@@ -116,7 +116,7 @@ public class AuthServiceTest extends BaseTest {
     UserDto expectedResult = createdUser;
     UserDto actualResult = authService.signUp(signUp);
 
-    assertThat(expectedResult).isEqualTo(actualResult);
+    assertThat(actualResult).isEqualTo(expectedResult);
   }
 
   @Test

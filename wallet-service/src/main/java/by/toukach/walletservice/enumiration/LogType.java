@@ -8,8 +8,7 @@ public enum LogType {
   TRANSACTION("Транзакция"),
   AUTH("Авторизация"),
   ACCOUNT("Операция над счетом");
-
-
+  
   private final String value;
 
   LogType(String value) {

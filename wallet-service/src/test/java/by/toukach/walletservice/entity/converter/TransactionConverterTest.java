@@ -24,7 +24,7 @@ public class TransactionConverterTest extends BaseTest {
 
   @BeforeEach
   public void setUp() {
-    entity = getTransactionEntity();
+    entity = getTransaction();
     dto = getTransactionDto();
   }
 
@@ -34,7 +34,7 @@ public class TransactionConverterTest extends BaseTest {
     Transaction expectedResult = entity;
     Transaction actualResult = transactionConverter.toEntity(dto);
 
-    assertThat(expectedResult).isEqualTo(actualResult);
+    assertThat(actualResult).isEqualTo(expectedResult);
   }
 
   @Test

@@ -14,10 +14,12 @@ import by.toukach.walletservice.enumiration.TransactionType;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import org.testcontainers.containers.PostgreSQLContainer;
 
 public class BaseTest {
 
   protected static final long FIRST_ENTITY_ID = 1L;
+  protected static final long SECOND_ENTITY_ID = 2L;
   protected static final long USER_ID = 2L;
   protected static final String LOGIN = "user";
   protected static final String SECOND_LOGIN = "user2";
@@ -28,40 +30,51 @@ public class BaseTest {
   protected static final String ADMIN_PASSWORD = "admin";
   protected static final long UN_EXISTING_ID = 99L;
   protected static final String UN_EXISTING_LOGIN = "unExistingLogin";
-  protected static final long ACCOUNT_ID = 2L;
+  protected static final long ACCOUNT_ID = 1L;
   protected static final String ACCOUNT_TITLE = "account";
   protected static final double ACCOUNT_SUM = 10D;
   protected static final double UPDATED_ACCOUNT_SUM = 10D;
   protected static final long TRANSACTION_ID = 1L;
   protected static final double TRANSACTION_VALUE = 5D;
+  protected static final double UPDATED_VALUE = ACCOUNT_SUM + TRANSACTION_VALUE;
   protected static final String LOG_VALUE = "log";
-  protected static final LocalDateTime CREATED_AT = LocalDateTime.now();
+  protected static final LocalDateTime CREATED_AT =
+      LocalDateTime.parse("1970-10-10T10:10:10").withNano(0);
   protected static final Long LOG_ID = 2L;
   protected static final Double VALUE_BIG_AMOUNT = 100000D;
+  protected static final String DB_IMAGE_VERSION = "postgres:14.2-alpine";
+  protected static final String DB_NAME = "wallet";
+  protected static final String DB_USERNAME = "toukach";
+  protected static final String DB_PASSWORD = "ylab";
+  protected static final String DB_SCRIPT_PATH = "db/create-scheme.sql";
+  protected static final String TAG_V_0_0 = "v0.0";
 
-  protected User getNewUserEntity() {
+  protected User getNewUser() {
     return User.builder()
+        .createdAt(CREATED_AT)
         .login(LOGIN)
         .password(PASSWORD)
         .accountList(new ArrayList<>())
         .build();
   }
 
-  protected User getCreatedUserEntity() {
-    User user = getNewUserEntity();
+  protected User getCreatedUser() {
+    User user = getNewUser();
     user.setId(USER_ID);
+    user.setCreatedAt(CREATED_AT);
     return user;
   }
 
-  protected User getUpdatedUserEntity() {
-    User user = getCreatedUserEntity();
-    user.setAccountList(List.of(getCreatedAccountEntity()));
+  protected User getUpdatedUser() {
+    User user = getCreatedUser();
+    user.setAccountList(List.of(getCreatedAccount()));
     return user;
   }
 
-  protected User getAdminEntity() {
+  protected User getAdmin() {
     return User.builder()
         .id(ADMIN_ID)
+        .createdAt(CREATED_AT)
         .login(ADMIN_LOGIN)
         .password(ADMIN_PASSWORD)
         .accountList(new ArrayList<>())
@@ -87,54 +100,78 @@ public class BaseTest {
   protected UserDto getCreatedUserDto() {
     UserDto user = getNewUserDto();
     user.setId(USER_ID);
+    user.setCreatedAt(CREATED_AT);
     return user;
   }
 
   protected UserDto getUpdatedUserDto() {
     UserDto userDto = getSecondNewUserDto();
     userDto.setId(USER_ID);
+    userDto.setCreatedAt(CREATED_AT);
     AccountDto account = getCreatedAccountDto();
     account.setSum(UPDATED_ACCOUNT_SUM);
     userDto.setAccountList(List.of(account));
     return userDto;
   }
 
-  protected Account getNewAccountEntity() {
+  protected Account getNewAccount() {
     return Account.builder()
+        .createdAt(CREATED_AT)
         .title(ACCOUNT_TITLE)
         .sum(ACCOUNT_SUM)
+        .userId(USER_ID)
         .build();
   }
 
-  protected Account getCreatedAccountEntity() {
-    Account account = getNewAccountEntity();
+  protected Account getCreatedAccount() {
+    Account account = getNewAccount();
     account.setId(ACCOUNT_ID);
+    account.setCreatedAt(CREATED_AT);
     return account;
   }
 
-  protected Account getUpdatedAccountEntity() {
-    Account account = getCreatedAccountEntity();
-    account.setSum(ACCOUNT_SUM + TRANSACTION_VALUE);
+  protected Account getUpdatedAccount() {
+    Account account = getCreatedAccount();
+    account.setSum(UPDATED_VALUE);
+    account.setCreatedAt(CREATED_AT);
     return account;
+  }
+
+  protected Account getUnExistingAccount() {
+    Account account = getCreatedAccount();
+    account.setId(UN_EXISTING_ID);
+
+    return account;
+  }
+
+  protected List<Account> getAccountList() {
+    return List.of(getCreatedAccount());
   }
 
   protected AccountDto getNewAccountDto() {
     return AccountDto.builder()
         .title(ACCOUNT_TITLE)
         .sum(ACCOUNT_SUM)
+        .userId(USER_ID)
         .build();
   }
 
   protected AccountDto getCreatedAccountDto() {
     AccountDto account = getNewAccountDto();
     account.setId(ACCOUNT_ID);
+    account.setCreatedAt(CREATED_AT);
     return account;
   }
 
   protected AccountDto getUpdatedAccountDto() {
     AccountDto account = getCreatedAccountDto();
     account.setSum(ACCOUNT_SUM + TRANSACTION_VALUE);
+    account.setCreatedAt(CREATED_AT);
     return account;
+  }
+
+  protected List<AccountDto> getAccountDtoList() {
+    return List.of(getCreatedAccountDto());
   }
 
   protected Log getNewLog() {
@@ -149,13 +186,6 @@ public class BaseTest {
     Log log = getNewLog();
     log.setId(LOG_ID);
     return log;
-  }
-
-  protected LogInDto getAdminLogIn() {
-    return LogInDto.builder()
-        .login(ADMIN_LOGIN)
-        .password(ADMIN_PASSWORD)
-        .build();
   }
 
   protected LogInDto getLogIn() {
@@ -175,6 +205,7 @@ public class BaseTest {
   protected TransactionDto getTransactionDto() {
     return TransactionDto.builder()
         .id(TRANSACTION_ID)
+        .createdAt(CREATED_AT)
         .type(TransactionType.CREDIT)
         .userId(USER_ID)
         .accountId(ACCOUNT_ID)
@@ -182,9 +213,10 @@ public class BaseTest {
         .build();
   }
 
-  protected Transaction getTransactionEntity() {
+  protected Transaction getTransaction() {
     return Transaction.builder()
         .id(TRANSACTION_ID)
+        .createdAt(CREATED_AT)
         .type(TransactionType.CREDIT)
         .userId(USER_ID)
         .accountId(ACCOUNT_ID)

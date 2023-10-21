@@ -25,7 +25,7 @@ public class UserConverterTest extends BaseTest {
   @BeforeEach
   public void setUp() throws NoSuchMethodException, InvocationTargetException,
       InstantiationException, IllegalAccessException {
-    entity = getCreatedUserEntity();
+    entity = getCreatedUser();
     dto = getCreatedUserDto();
   }
 
@@ -35,7 +35,7 @@ public class UserConverterTest extends BaseTest {
     User expectedResult = entity;
     User actualResult = userConverter.toEntity(dto);
 
-    assertThat(expectedResult).isEqualTo(actualResult);
+    assertThat(actualResult).isEqualTo(expectedResult);
   }
 
   @Test
@@ -44,6 +44,6 @@ public class UserConverterTest extends BaseTest {
     UserDto expectedResult = dto;
     UserDto actualResult = userConverter.toDto(entity);
 
-    assertThat(expectedResult).isEqualTo(actualResult);
+    assertThat(actualResult).isEqualTo(expectedResult);
   }
 }

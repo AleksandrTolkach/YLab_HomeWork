@@ -18,8 +18,10 @@ public class AccountConverter implements Converter<Account, AccountDto> {
   public Account toEntity(AccountDto dto) {
     return Account.builder()
         .id(dto.getId())
+        .createdAt(dto.getCreatedAt())
         .title(dto.getTitle())
         .sum(dto.getSum())
+        .userId(dto.getUserId())
         .build();
   }
 
@@ -27,8 +29,10 @@ public class AccountConverter implements Converter<Account, AccountDto> {
   public AccountDto toDto(Account entity) {
     return AccountDto.builder()
         .id(entity.getId())
+        .createdAt(entity.getCreatedAt())
         .title(entity.getTitle())
         .sum(entity.getSum())
+        .userId(entity.getUserId())
         .build();
   }
 

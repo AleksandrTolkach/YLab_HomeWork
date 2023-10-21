@@ -11,10 +11,10 @@ import by.toukach.walletservice.dto.AccountDto;
 import by.toukach.walletservice.dto.TransactionDto;
 import by.toukach.walletservice.entity.Log;
 import by.toukach.walletservice.enumiration.TransactionType;
-import by.toukach.walletservice.exceptions.ArgumentValueException;
-import by.toukach.walletservice.exceptions.EntityDuplicateException;
-import by.toukach.walletservice.exceptions.EntityNotFoundException;
-import by.toukach.walletservice.exceptions.InsufficientFundsException;
+import by.toukach.walletservice.exception.ArgumentValueException;
+import by.toukach.walletservice.exception.EntityDuplicateException;
+import by.toukach.walletservice.exception.EntityNotFoundException;
+import by.toukach.walletservice.exception.InsufficientFundsException;
 import by.toukach.walletservice.service.handler.impl.DebitTransactionHandler;
 import by.toukach.walletservice.service.impl.AccountServiceImpl;
 import by.toukach.walletservice.service.impl.LoggerServiceImpl;
@@ -86,7 +86,7 @@ public class DebitTransactionHandlerTest extends BaseTest {
     TransactionDto expectedResult = transaction;
     TransactionDto actualResult = debitTransactionHandler.handle(transaction);
 
-    assertThat(expectedResult).isEqualTo(actualResult);
+    assertThat(actualResult).isEqualTo(expectedResult);
   }
 
   @Test
@@ -138,6 +138,6 @@ public class DebitTransactionHandlerTest extends BaseTest {
     TransactionType expectedResult = TransactionType.DEBIT;
     TransactionType actualResult = debitTransactionHandler.type();
 
-    assertThat(expectedResult).isEqualTo(actualResult);
+    assertThat(actualResult).isEqualTo(expectedResult);
   }
 }

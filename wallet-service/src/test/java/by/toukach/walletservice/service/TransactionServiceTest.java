@@ -10,8 +10,7 @@ import by.toukach.walletservice.BaseTest;
 import by.toukach.walletservice.dto.TransactionDto;
 import by.toukach.walletservice.entity.Transaction;
 import by.toukach.walletservice.entity.converter.impl.TransactionConverter;
-import by.toukach.walletservice.exceptions.EntityDuplicateException;
-import by.toukach.walletservice.exceptions.EntityNotFoundException;
+import by.toukach.walletservice.exception.EntityNotFoundException;
 import by.toukach.walletservice.repository.impl.TransactionRepositoryImpl;
 import by.toukach.walletservice.service.impl.TransactionServiceImpl;
 import by.toukach.walletservice.service.impl.UserServiceImpl;
@@ -50,7 +49,7 @@ public class TransactionServiceTest extends BaseTest {
   public void setUp() throws NoSuchMethodException, InvocationTargetException,
       InstantiationException, IllegalAccessException {
     transactionDto = getTransactionDto();
-    transaction = getTransactionEntity();
+    transaction = getTransaction();
 
     transactionRepositoryMock = mockStatic(TransactionRepositoryImpl.class);
     transactionRepositoryMock.when(TransactionRepositoryImpl::getInstance)
@@ -88,16 +87,7 @@ public class TransactionServiceTest extends BaseTest {
     TransactionDto expectedResult = transactionDto;
     TransactionDto actualResult = transactionService.createTransaction(transactionDto);
 
-    assertThat(expectedResult).isEqualTo(actualResult);
-  }
-
-  @Test
-  @DisplayName("Тест создания транзакции в приложении с дублирующим ID")
-  public void createTransactionTest_should_ThrowError_WhenTransactionExists() {
-    when(transactionRepository.isExists(TRANSACTION_ID)).thenReturn(true);
-
-    assertThatThrownBy(() -> transactionService.createTransaction(transactionDto))
-        .isInstanceOf(EntityDuplicateException.class);
+    assertThat(actualResult).isEqualTo(expectedResult);
   }
 
   @Test
@@ -109,7 +99,7 @@ public class TransactionServiceTest extends BaseTest {
     TransactionDto expectedResult = transactionDto;
     TransactionDto actualResult = transactionService.findTransactionById(TRANSACTION_ID);
 
-    assertThat(expectedResult).isEqualTo(actualResult);
+    assertThat(actualResult).isEqualTo(expectedResult);
   }
 
   @Test
@@ -133,7 +123,7 @@ public class TransactionServiceTest extends BaseTest {
     List<TransactionDto> expectedResult = List.of(transactionDto);
     List<TransactionDto> actualResult = transactionService.findTransactionByUserId(USER_ID);
 
-    assertThat(expectedResult).isEqualTo(actualResult);
+    assertThat(actualResult).isEqualTo(expectedResult);
   }
 
   @Test

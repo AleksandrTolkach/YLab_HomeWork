@@ -4,8 +4,8 @@ import by.toukach.walletservice.dto.AccountDto;
 import by.toukach.walletservice.dto.TransactionDto;
 import by.toukach.walletservice.dto.UserDto;
 import by.toukach.walletservice.enumiration.TransactionType;
-import by.toukach.walletservice.exceptions.ArgumentValueException;
-import by.toukach.walletservice.exceptions.EntityDuplicateException;
+import by.toukach.walletservice.exception.ArgumentValueException;
+import by.toukach.walletservice.exception.EntityDuplicateException;
 import java.util.Scanner;
 
 /**
@@ -26,12 +26,7 @@ public class CreditAccountViewChain extends TransactionViewChain {
     double answer = scanner.nextDouble();
     scanner.nextLine();
 
-    System.out.println(ViewMessage.TRANSACTION_ID);
-    long transactionId = scanner.nextLong();
-    scanner.nextLine();
-
     TransactionDto transactionDto = TransactionDto.builder()
-        .id(transactionId)
         .type(TransactionType.CREDIT)
         .userId(getUserDto().getId())
         .accountId(getAccountDto().getId())
@@ -39,8 +34,7 @@ public class CreditAccountViewChain extends TransactionViewChain {
         .build();
 
     try {
-      getTransactionHandlerFactory().getHandler(TransactionType.CREDIT)
-          .handle(transactionDto);
+      getTransactionHandlerFactory().getHandler(TransactionType.CREDIT).handle(transactionDto);
     } catch (EntityDuplicateException | ArgumentValueException e) {
       System.out.println(e.getMessage());
       setNextViewChain(this);
@@ -48,7 +42,7 @@ public class CreditAccountViewChain extends TransactionViewChain {
 
     Long accountId = getAccountDto().getId();
 
-    setNextViewChain(new SpecificAccountViewChain(getAccountService()
-        .findAccountById(accountId), getUserDto()));
+    AccountDto accountById = getAccountService().findAccountById(accountId);
+    setNextViewChain(new SpecificAccountViewChain(accountById, getUserDto()));
   }
 }

@@ -4,4 +4,5 @@
 
 ### Список заданий:  
 
-1. [Wallet-Service](wallet-service/wallet-service.md)  
+1. [Wallet-Service](docs/wallet-service-start.md)    
+2. [Wallet-Service + JDBC](docs/wallet-service-jdbc.md)

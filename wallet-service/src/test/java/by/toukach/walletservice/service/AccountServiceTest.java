@@ -12,13 +12,14 @@ import by.toukach.walletservice.dto.UserDto;
 import by.toukach.walletservice.entity.Account;
 import by.toukach.walletservice.entity.Log;
 import by.toukach.walletservice.entity.converter.impl.AccountConverter;
-import by.toukach.walletservice.exceptions.EntityNotFoundException;
+import by.toukach.walletservice.exception.EntityNotFoundException;
 import by.toukach.walletservice.repository.impl.AccountRepositoryImpl;
 import by.toukach.walletservice.service.impl.AccountServiceImpl;
 import by.toukach.walletservice.service.impl.LoggerServiceImpl;
 import by.toukach.walletservice.service.impl.UserServiceImpl;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -54,9 +55,10 @@ public class AccountServiceTest extends BaseTest {
   private Account newAccount;
   private Account createdAccount;
   private Account updatedAccount;
-  private UserDto updatedUserDto;
   private Log newLog;
   private Log createdLog;
+  private List<AccountDto> accountDtoList;
+  private List<Account> accountList;
 
   @BeforeEach
   public void setUp() throws NoSuchMethodException, InvocationTargetException,
@@ -65,12 +67,13 @@ public class AccountServiceTest extends BaseTest {
     newAccountDto = getNewAccountDto();
     createdAccountDto = getCreatedAccountDto();
     updatedAccountDto = getUpdatedAccountDto();
-    newAccount = getNewAccountEntity();
-    createdAccount = getCreatedAccountEntity();
-    updatedAccount = getUpdatedAccountEntity();
-    updatedUserDto = getUpdatedUserDto();
+    newAccount = getNewAccount();
+    createdAccount = getCreatedAccount();
+    updatedAccount = getUpdatedAccount();
     newLog = getNewLog();
     createdLog = getCreatedLog();
+    accountDtoList = getAccountDtoList();
+    accountList = getAccountList();
 
     userServiceMock = mockStatic(UserServiceImpl.class);
     userServiceMock.when(UserServiceImpl::getInstance).thenReturn(userService);
@@ -106,13 +109,12 @@ public class AccountServiceTest extends BaseTest {
     when(accountConverter.toEntity(newAccountDto)).thenReturn(newAccount);
     when(accountRepository.createAccount(newAccount)).thenReturn(createdAccount);
     when(accountConverter.toDto(createdAccount)).thenReturn(createdAccountDto);
-    when(userService.updateUser(updatedUserDto)).thenReturn(updatedUserDto);
     when(loggerService.createLog(newLog)).thenReturn(createdLog);
 
     AccountDto expectedResult = createdAccountDto;
-    AccountDto actualResult = accountService.createAccount(newAccountDto, USER_ID);
+    AccountDto actualResult = accountService.createAccount(newAccountDto);
 
-    assertThat(expectedResult).isEqualTo(actualResult);
+    assertThat(actualResult).isEqualTo(expectedResult);
   }
 
   @Test
@@ -120,7 +122,7 @@ public class AccountServiceTest extends BaseTest {
   public void createAccountTest_should_ThrowError_WhenUserNotExist() {
     when(userService.findUserById(USER_ID)).thenThrow(EntityNotFoundException.class);
 
-    assertThatThrownBy(() -> accountService.createAccount(newAccountDto, UN_EXISTING_ID))
+    assertThatThrownBy(() -> accountService.createAccount(newAccountDto))
         .isInstanceOf(EntityNotFoundException.class);
   }
 
@@ -133,7 +135,7 @@ public class AccountServiceTest extends BaseTest {
     AccountDto expectedResult = createdAccountDto;
     AccountDto actualResult = accountService.findAccountById(ACCOUNT_ID);
 
-    assertThat(expectedResult).isEqualTo(actualResult);
+    assertThat(actualResult).isEqualTo(expectedResult);
   }
 
   @Test
@@ -147,15 +149,39 @@ public class AccountServiceTest extends BaseTest {
   }
 
   @Test
+  @DisplayName("Тест поиска счета в приложении по ID пользователя")
+  public void findAccountsByUserIdTest_should_FindAccount() {
+    when(accountRepository.findAccountsByUserId(USER_ID)).thenReturn(accountList);
+    when(accountConverter.toDto(createdAccount)).thenReturn(createdAccountDto);
+
+    List<AccountDto> expectedResult = List.of(createdAccountDto);
+    List<AccountDto> actualResult = accountService.findAccountsByUserId(USER_ID);
+
+    assertThat(actualResult).isEqualTo(expectedResult);
+  }
+
+  @Test
+  @DisplayName("Тест поиска счета в приложении по несуществующему ID пользователя")
+  public void findAccountsByUserIdTest_should_ThrowError_WhenUserNotExist() {
+    when(accountRepository.findAccountsByUserId(UN_EXISTING_ID))
+        .thenThrow(EntityNotFoundException.class);
+
+    assertThatThrownBy(() -> accountService.findAccountsByUserId(UN_EXISTING_ID))
+        .isInstanceOf(EntityNotFoundException.class);
+  }
+
+  @Test
   @DisplayName("Тест обновления счета в приложении")
   public void updateAccountTest_should_UpdateAccount() {
+    when(userService.isExists(USER_ID)).thenReturn(true);
     when(accountRepository.findAccountById(ACCOUNT_ID)).thenReturn(createdAccount);
+    when(accountRepository.updateAccount(createdAccount)).thenReturn(updatedAccount);
     when(accountConverter.toDto(updatedAccount)).thenReturn(updatedAccountDto);
 
     AccountDto expectedResult = updatedAccountDto;
     AccountDto actualResult = accountService.updateAccount(updatedAccountDto);
 
-    assertThat(expectedResult).isEqualTo(actualResult);
+    assertThat(actualResult).isEqualTo(expectedResult);
   }
 
   @Test

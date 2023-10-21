@@ -23,7 +23,7 @@ public class AccountConverterTest extends BaseTest {
 
   @BeforeEach
   public void setUp() {
-    entity = getCreatedAccountEntity();
+    entity = getCreatedAccount();
     dto = getCreatedAccountDto();
   }
 
@@ -33,7 +33,7 @@ public class AccountConverterTest extends BaseTest {
     Account expectedResult = entity;
     Account actualResult = accountConverter.toEntity(dto);
 
-    assertThat(expectedResult).isEqualTo(actualResult);
+    assertThat(actualResult).isEqualTo(expectedResult);
   }
 
   @Test
@@ -42,6 +42,6 @@ public class AccountConverterTest extends BaseTest {
     AccountDto expectedResult = dto;
     AccountDto actualResult = accountConverter.toDto(entity);
 
-    assertThat(expectedResult).isEqualTo(actualResult);
+    assertThat(actualResult).isEqualTo(expectedResult);
   }
 }

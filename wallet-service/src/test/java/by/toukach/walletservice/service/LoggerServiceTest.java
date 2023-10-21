@@ -64,7 +64,7 @@ public class LoggerServiceTest extends BaseTest {
     Log expectedResult = createdLog;
     Log actualResult = loggerService.createLog(newLog);
 
-    assertThat(expectedResult).isEqualTo(actualResult);
+    assertThat(actualResult).isEqualTo(expectedResult);
   }
 
   @Test
@@ -75,6 +75,6 @@ public class LoggerServiceTest extends BaseTest {
     List<Log> expectedResult = List.of(createdLog);
     List<Log> actualResult = loggerService.findLogs();
 
-    assertThat(expectedResult).isEqualTo(actualResult);
+    assertThat(actualResult).isEqualTo(expectedResult);
   }
 }

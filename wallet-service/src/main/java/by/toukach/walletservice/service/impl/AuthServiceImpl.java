@@ -5,8 +5,8 @@ import by.toukach.walletservice.dto.SignUpDto;
 import by.toukach.walletservice.dto.UserDto;
 import by.toukach.walletservice.entity.Log;
 import by.toukach.walletservice.enumiration.LogType;
-import by.toukach.walletservice.exceptions.EntityNotFoundException;
-import by.toukach.walletservice.exceptions.ExceptionMessage;
+import by.toukach.walletservice.exception.EntityNotFoundException;
+import by.toukach.walletservice.exception.ExceptionMessage;
 import by.toukach.walletservice.service.AuthService;
 import by.toukach.walletservice.service.LoggerService;
 import by.toukach.walletservice.service.UserService;
@@ -32,6 +32,7 @@ public class AuthServiceImpl implements AuthService {
   public UserDto logIn(LogInDto logInDto) {
     try {
       UserDto userDto = userService.findUserByLogin(logInDto.getLogin());
+
       if (!userDto.getPassword().equals(logInDto.getPassword())) {
         throw new EntityNotFoundException();
       } else {
@@ -53,6 +54,7 @@ public class AuthServiceImpl implements AuthService {
         .password(signUpDto.getPassword())
         .accountList(new ArrayList<>())
         .build();
+
     userDto = userService.createUser(userDto);
 
     Log log = LogUtil.prepareLog(LogType.AUTH, String.format(LogUtil.SIGN_UP, userDto.getId()));

@@ -1,95 +1,118 @@
 package by.toukach.walletservice.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import by.toukach.walletservice.BaseTest;
+import by.toukach.walletservice.ContainersEnvironment;
+import by.toukach.walletservice.entity.Account;
 import by.toukach.walletservice.entity.Transaction;
+import by.toukach.walletservice.entity.User;
+import by.toukach.walletservice.exception.EntityNotFoundException;
+import by.toukach.walletservice.repository.impl.AccountRepositoryImpl;
+import by.toukach.walletservice.repository.impl.MigrationImpl;
 import by.toukach.walletservice.repository.impl.TransactionRepositoryImpl;
+import by.toukach.walletservice.repository.impl.UserRepositoryImpl;
 import java.util.ArrayList;
 import java.util.List;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.junit.jupiter.MockitoExtension;
 
-@ExtendWith(MockitoExtension.class)
-public class TransactionRepositoryTest extends BaseTest {
+public class TransactionRepositoryTest extends ContainersEnvironment {
 
-  @InjectMocks
-  private TransactionRepositoryImpl transactionRepository;
+  private TransactionRepository transactionRepository;
+  private UserRepository userRepository;
+  private AccountRepository accountRepository;
+  private Migration migration;
   private Transaction transaction;
+  private User user;
+  private Account account;
 
   @BeforeEach
-  public void setUp() {
-    transaction = getTransactionEntity();
+  public void setUp() throws NoSuchFieldException, IllegalAccessException {
+    injectTestJdbcUrl();
 
+    migration = MigrationImpl.getInstance();
+    migration.migrate();
+
+    transactionRepository = TransactionRepositoryImpl.getInstance();
+    userRepository = UserRepositoryImpl.getInstance();
+    accountRepository = AccountRepositoryImpl.getInstance();
+    transaction = getTransaction();
+    user = getNewUser();
+    account = getNewAccount();
+
+    userRepository.createUser(user);
+    accountRepository.createAccount(account);
     transactionRepository.createTransaction(transaction);
   }
 
+  @AfterEach
+  public void cleanUp() {
+    migration.rollback(TAG_V_0_0);
+  }
+
   @Test
-  @DisplayName("Тест сохранения транзакции в памяти")
+  @DisplayName("Тест сохранения транзакции в БД")
   public void createTransactionTest_should_CreateTransaction() {
     Transaction expectedResult = transaction;
     Transaction actualResult = transactionRepository.createTransaction(
         transaction);
 
-    assertThat(expectedResult).isEqualTo(actualResult);
+    assertThat(actualResult).isEqualTo(expectedResult);
   }
 
   @Test
-  @DisplayName("Тест поиска транзакции в памяти по ID")
+  @DisplayName("Тест поиска транзакции в БД по ID")
   public void findTransactionByIdTest_should_FindTransaction() {
     Transaction expectedResult = transaction;
     Transaction actualResult = transactionRepository.findTransactionById(TRANSACTION_ID);
 
-    assertThat(expectedResult).isEqualTo(actualResult);
+    assertThat(actualResult).isEqualTo(expectedResult);
   }
 
   @Test
-  @DisplayName("Тест поиска транзакции в памяти по несуществующему ID")
-  public void findTransactionByIdTest_should_ReturnNullIfTransactionNotFound() {
-    Transaction expectedResult = null;
-    Transaction actualResult = transactionRepository.findTransactionById(UN_EXISTING_ID);
-
-    assertThat(expectedResult).isEqualTo(actualResult);
+  @DisplayName("Тест поиска транзакции в БД по несуществующему ID")
+  public void findTransactionByIdTest_should_ThrowError_WhenTransactionNotFound() {
+    assertThatThrownBy(() -> transactionRepository.findTransactionById(UN_EXISTING_ID))
+        .isInstanceOf(EntityNotFoundException.class);
   }
 
   @Test
-  @DisplayName("Тест поиска транзакций в памяти по ID пользователя")
+  @DisplayName("Тест поиска транзакций в БД по ID пользователя")
   public void findTransactionByUserIdTest_should_FindTransaction() {
     List<Transaction> expectedResult = List.of(transaction);
     List<Transaction> actualResult = transactionRepository.findTransactionByUserId(USER_ID);
 
-    assertThat(expectedResult).isEqualTo(actualResult);
+    assertThat(actualResult).isEqualTo(expectedResult);
   }
 
   @Test
-  @DisplayName("Тест поиска транзакций в памяти по несуществующему ID пользователя")
+  @DisplayName("Тест поиска транзакций в БД по несуществующему ID пользователя")
   public void findTransactionByUserIdTest_should_ReturnEmptyListIfTransactionNotFound() {
     List<Transaction> expectedResult = new ArrayList<>();
     List<Transaction> actualResult =
         transactionRepository.findTransactionByUserId(UN_EXISTING_ID);
 
-    assertThat(expectedResult).isEqualTo(actualResult);
+    assertThat(actualResult).isEqualTo(expectedResult);
   }
 
   @Test
-  @DisplayName("Тест проверки существования транзакции в памяти по ID")
+  @DisplayName("Тест проверки существования транзакции в БД по ID")
   public void isExistsTest_should_ReturnTrueIfTransactionExists() {
     boolean expectedResult = true;
     boolean actualResult = transactionRepository.isExists(TRANSACTION_ID);
 
-    assertThat(expectedResult).isEqualTo(actualResult);
+    assertThat(actualResult).isEqualTo(expectedResult);
   }
 
   @Test
-  @DisplayName("Тест проверки существования транзакции в памяти по несуществующему ID")
+  @DisplayName("Тест проверки существования транзакции в БД по несуществующему ID")
   public void isExistsTest_should_ReturnFalseIfTransactionNotExist() {
     boolean expectedResult = false;
     boolean actualResult = transactionRepository.isExists(UN_EXISTING_ID);
 
-    assertThat(expectedResult).isEqualTo(actualResult);
+    assertThat(actualResult).isEqualTo(expectedResult);
   }
 }

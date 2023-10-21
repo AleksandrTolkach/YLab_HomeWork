@@ -4,9 +4,9 @@ import by.toukach.walletservice.dto.AccountDto;
 import by.toukach.walletservice.dto.TransactionDto;
 import by.toukach.walletservice.dto.UserDto;
 import by.toukach.walletservice.enumiration.TransactionType;
-import by.toukach.walletservice.exceptions.ArgumentValueException;
-import by.toukach.walletservice.exceptions.EntityDuplicateException;
-import by.toukach.walletservice.exceptions.InsufficientFundsException;
+import by.toukach.walletservice.exception.ArgumentValueException;
+import by.toukach.walletservice.exception.EntityDuplicateException;
+import by.toukach.walletservice.exception.InsufficientFundsException;
 import java.util.Scanner;
 
 /**
@@ -27,12 +27,7 @@ public class DebitAccountViewChain extends TransactionViewChain {
     double answer = scanner.nextDouble();
     scanner.nextLine();
 
-    System.out.println(ViewMessage.TRANSACTION_ID);
-    long transactionId = scanner.nextLong();
-    scanner.nextLine();
-
     TransactionDto transactionDto = TransactionDto.builder()
-        .id(transactionId)
         .type(TransactionType.DEBIT)
         .userId(getUserDto().getId())
         .accountId(getAccountDto().getId())

@@ -32,14 +32,6 @@ public interface UserService {
   UserDto findUserByLogin(String login);
 
   /**
-   * Метод для обновления пользовательских данных.
-   *
-   * @param userDto обновляемый пользователь.
-   * @return обновленный пользователь.
-   */
-  UserDto updateUser(UserDto userDto);
-
-  /**
    * Метод для проверки существования пользователя.
    *
    * @param id id для проверки.

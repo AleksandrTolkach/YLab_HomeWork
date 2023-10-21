@@ -1,4 +1,4 @@
-package by.toukach.walletservice.exceptions;
+package by.toukach.walletservice.exception;
 
 /**
  * Класс представляющий исключение,

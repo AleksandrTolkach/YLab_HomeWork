@@ -20,8 +20,7 @@ public class ListAccountViewChain extends AccountViewChain {
   @Override
   public void handle() {
 
-    List<AccountDto> accountDtos = getUserService().findUserById(getUserDto().getId())
-        .getAccountList();
+    List<AccountDto> accountDtos = getAccountService().findAccountsByUserId(getUserDto().getId());
     if (accountDtos.isEmpty()) {
       System.out.println(ViewMessage.ACCOUNTS_NOT_EXIST);
       setNextViewChain(new AccountActionViewChain(getUserDto()));
