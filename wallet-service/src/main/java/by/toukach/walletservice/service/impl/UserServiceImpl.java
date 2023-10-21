@@ -42,24 +42,18 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public UserDto findUserById(Long id) {
-    User user = userRepository.findUserById(id);
-    if (user == null) {
-      throw new EntityNotFoundException(String.format(ExceptionMessage.USER_BY_ID_NOT_FOUND, id));
-    } else {
-      return userConverter.toDto(user);
-    }
+    User user = userRepository.findUserById(id).orElseThrow(() ->
+        new EntityNotFoundException(String.format(ExceptionMessage.USER_BY_ID_NOT_FOUND, id)));
+
+    return userConverter.toDto(user);
   }
 
   @Override
   public UserDto findUserByLogin(String login) {
-    User user = userRepository.findUserByLogin(login);
+    User user = userRepository.findUserByLogin(login).orElseThrow(() ->
+        new EntityNotFoundException(String.format(ExceptionMessage.USER_BY_ID_NOT_FOUND, login)));
 
-    if (user == null) {
-      throw new EntityNotFoundException(
-          String.format(ExceptionMessage.USER_BY_LOGIN_NOT_FOUND, login));
-    } else {
-      return userConverter.toDto(user);
-    }
+    return userConverter.toDto(user);
   }
 
   @Override

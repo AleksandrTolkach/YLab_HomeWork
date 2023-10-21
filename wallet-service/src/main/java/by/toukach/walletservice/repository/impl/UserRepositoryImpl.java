@@ -4,7 +4,6 @@ import by.toukach.walletservice.entity.User;
 import by.toukach.walletservice.entity.mapper.RowMapper;
 import by.toukach.walletservice.entity.mapper.impl.UserMapper;
 import by.toukach.walletservice.exception.DbException;
-import by.toukach.walletservice.exception.EntityNotFoundException;
 import by.toukach.walletservice.exception.ExceptionMessage;
 import by.toukach.walletservice.repository.DbInitializer;
 import by.toukach.walletservice.repository.UserRepository;
@@ -12,6 +11,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Optional;
 
 /**
  * Класс для выполнения запросов, связанных с пользователями, в память.
@@ -64,12 +64,12 @@ public class UserRepositoryImpl implements UserRepository {
   }
 
   @Override
-  public User findUserById(Long id) {
+  public Optional<User> findUserById(Long id) {
     return findUserBy(ID, id);
   }
 
   @Override
-  public User findUserByLogin(String login) {
+  public Optional<User> findUserByLogin(String login) {
     return findUserBy(LOGIN, login);
   }
 
@@ -87,7 +87,7 @@ public class UserRepositoryImpl implements UserRepository {
     return instance;
   }
 
-  private User findUserBy(String argumentName, Object argumentValue) {
+  private Optional<User> findUserBy(String argumentName, Object argumentValue) {
     Connection connection = dbInitializer.getConnection();
 
     try (PreparedStatement statement = connection.prepareStatement(
@@ -102,12 +102,9 @@ public class UserRepositoryImpl implements UserRepository {
 
       ResultSet resultSet = statement.executeQuery();
 
-      if (!resultSet.wasNull() && resultSet.next()) {
-        return userRowMapper.mapRow(resultSet);
-      } else {
-        throw new EntityNotFoundException(String.format(ExceptionMessage.USER_NOT_FOUND,
-            argumentName, argumentValue));
-      }
+      return !resultSet.wasNull() && resultSet.next()
+          ? Optional.of(userRowMapper.mapRow(resultSet))
+          : Optional.empty();
 
     } catch (SQLException e) {
       throw new DbException(ExceptionMessage.DB_REQUEST, e);

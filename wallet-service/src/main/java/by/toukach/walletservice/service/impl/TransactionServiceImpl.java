@@ -40,14 +40,10 @@ public class TransactionServiceImpl implements TransactionService {
 
   @Override
   public TransactionDto findTransactionById(Long id) {
-    Transaction transaction = transactionRepository.findTransactionById(id);
+    Transaction transaction = transactionRepository.findTransactionById(id).orElseThrow(() ->
+        new EntityNotFoundException(String.format(ExceptionMessage.TRANSACTION_NOT_FOUND, id)));
 
-    if (transaction == null) {
-      throw new EntityNotFoundException(
-          String.format(ExceptionMessage.TRANSACTION_NOT_FOUND, id));
-    } else {
-      return transactionConverter.toDto(transaction);
-    }
+    return transactionConverter.toDto(transaction);
   }
 
   @Override

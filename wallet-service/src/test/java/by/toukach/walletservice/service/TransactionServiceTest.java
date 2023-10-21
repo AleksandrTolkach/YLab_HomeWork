@@ -17,6 +17,7 @@ import by.toukach.walletservice.service.impl.UserServiceImpl;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -93,7 +94,8 @@ public class TransactionServiceTest extends BaseTest {
   @Test
   @DisplayName("Тест поиска транзакции по Id")
   public void findTransactionByIdTest_should_FindTransaction() {
-    when(transactionRepository.findTransactionById(TRANSACTION_ID)).thenReturn(transaction);
+    when(transactionRepository.findTransactionById(TRANSACTION_ID))
+        .thenReturn(Optional.of(transaction));
     when(transactionConverter.toDto(transaction)).thenReturn(transactionDto);
 
     TransactionDto expectedResult = transactionDto;
@@ -105,8 +107,7 @@ public class TransactionServiceTest extends BaseTest {
   @Test
   @DisplayName("Тест поиска транзакции по несуществующему ID")
   public void findTransactionByIdTest_should_ThrowError_WhenTransactionNotExist() {
-    when(transactionRepository.findTransactionById(UN_EXISTING_ID)).thenThrow(
-        EntityNotFoundException.class);
+    when(transactionRepository.findTransactionById(UN_EXISTING_ID)).thenReturn(Optional.empty());
 
     assertThatThrownBy(() -> transactionService.findTransactionById(UN_EXISTING_ID))
         .isInstanceOf(EntityNotFoundException.class);

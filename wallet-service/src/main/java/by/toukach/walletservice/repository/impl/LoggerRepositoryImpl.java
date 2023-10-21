@@ -78,11 +78,16 @@ public class LoggerRepositoryImpl implements LoggerRepository {
       while (resultSet.next()) {
         logList.add(logRowMapper.mapRow(resultSet));
       }
-
       return logList;
 
     } catch (SQLException e) {
       throw new DbException(ExceptionMessage.DB_REQUEST, e);
+    } finally {
+      try {
+        connection.close();
+      } catch (SQLException e) {
+        System.err.println(ExceptionMessage.CLOSE_CONNECTION_TO_DB);
+      }
     }
   }
 

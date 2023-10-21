@@ -1,15 +1,14 @@
 package by.toukach.walletservice.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import by.toukach.walletservice.ContainersEnvironment;
 import by.toukach.walletservice.entity.Account;
 import by.toukach.walletservice.entity.User;
-import by.toukach.walletservice.exception.EntityNotFoundException;
 import by.toukach.walletservice.repository.impl.AccountRepositoryImpl;
 import by.toukach.walletservice.repository.impl.MigrationImpl;
 import by.toukach.walletservice.repository.impl.UserRepositoryImpl;
+import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -33,8 +32,13 @@ public class AccountRepositoryTest extends ContainersEnvironment {
     migration = MigrationImpl.getInstance();
     migration.migrate();
 
+
+
     accountRepository = AccountRepositoryImpl.getInstance();
     userRepository = UserRepositoryImpl.getInstance();
+
+
+
     createdAccount = getCreatedAccount();
     newAccount = getNewAccount();
     updatedAccount = getUpdatedAccount();
@@ -63,33 +67,37 @@ public class AccountRepositoryTest extends ContainersEnvironment {
   @Test
   @DisplayName("Тест поиска счета в БД по ID")
   public void findAccountByIdTest_should_FindAccount() {
-    Account expectedResult = createdAccount;
-    Account actualResult = accountRepository.findAccountById(ACCOUNT_ID);
+    Optional<Account> expectedResult = Optional.of(createdAccount);
+    Optional<Account> actualResult = accountRepository.findAccountById(ACCOUNT_ID);
 
     assertThat(actualResult).isEqualTo(expectedResult);
   }
 
   @Test
   @DisplayName("Тест поиска счета в БД по несуществующему ID")
-  public void findAccountByIdTest_should_ThrowError_WhenAccountNotFound() {
-    assertThatThrownBy(() -> accountRepository.findAccountById(UN_EXISTING_ID))
-        .isInstanceOf(EntityNotFoundException.class);
+  public void findAccountByIdTest_should_ReturnEmptyOptional() {
+    Optional<Account> expectedResult = Optional.empty();
+    Optional<Account> actualResult = accountRepository.findAccountById(UN_EXISTING_ID);
+
+    assertThat(actualResult).isEqualTo(expectedResult);
   }
 
   @Test
   @DisplayName("Тест обновления счета в БД")
   public void updateAccountTest_should_UpdateAccount() {
-    Account expectedAccount = updatedAccount;
-    createdAccount.setSum(ACCOUNT_SUM + TRANSACTION_VALUE);
-    Account actualResult = accountRepository.updateAccount(createdAccount);
+    Optional<Account> expectedAccount = Optional.of(updatedAccount);
+    createdAccount.setSum(ACCOUNT_SUM.add(TRANSACTION_VALUE));
+    Optional<Account> actualResult = accountRepository.updateAccount(createdAccount);
 
     assertThat(actualResult).isEqualTo(expectedAccount);
   }
 
   @Test
   @DisplayName("Тест обновления несуществующего счета в БД")
-  public void updateAccountTest_should_ThrowError_WhenAccountNotExist() {
-    assertThatThrownBy(() -> accountRepository.updateAccount(unExistingAccount))
-        .isInstanceOf(EntityNotFoundException.class);
+  public void updateAccountTest_should_ReturnEmptyOptional() {
+    Optional<Account> expectedResult = Optional.empty();
+    Optional<Account> actualResult = accountRepository.updateAccount(unExistingAccount);
+
+    assertThat(actualResult).isEqualTo(expectedResult);
   }
 }

@@ -2,6 +2,7 @@ package by.toukach.walletservice.repository;
 
 import by.toukach.walletservice.entity.Transaction;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Интерфейс для выполнения запросов, связанных с операциями, в память.
@@ -22,7 +23,7 @@ public interface TransactionRepository {
    * @param id id запрашиваемой операции.
    * @return запрашиваемая операция.
    */
-  Transaction findTransactionById(Long id);
+  Optional<Transaction> findTransactionById(Long id);
 
   /**
    * Метод для чтения операций из памяти по id пользователя.

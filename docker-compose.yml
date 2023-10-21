@@ -1,8 +1,7 @@
 version: '3.5'
 services:
   db:
-    build: postgresql
-    image: wallet_postgresql:1.0.0
+    image: postgres:14.2-alpine
     restart: always
     env_file:
       - postgresql/db.env

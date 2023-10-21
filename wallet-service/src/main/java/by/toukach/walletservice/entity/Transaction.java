@@ -1,6 +1,7 @@
 package by.toukach.walletservice.entity;
 
 import by.toukach.walletservice.enumiration.TransactionType;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import lombok.Builder;
 import lombok.Data;
@@ -17,5 +18,5 @@ public class Transaction {
   private TransactionType type;
   private Long userId;
   private Long accountId;
-  private Double value;
+  private BigDecimal value;
 }

@@ -20,6 +20,7 @@ import by.toukach.walletservice.service.impl.UserServiceImpl;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -129,7 +130,7 @@ public class AccountServiceTest extends BaseTest {
   @Test
   @DisplayName("Тест поиска счета в приложении по ID")
   public void findAccountByIdTest_should_FindAccount() {
-    when(accountRepository.findAccountById(ACCOUNT_ID)).thenReturn(createdAccount);
+    when(accountRepository.findAccountById(ACCOUNT_ID)).thenReturn(Optional.of(createdAccount));
     when(accountConverter.toDto(createdAccount)).thenReturn(createdAccountDto);
 
     AccountDto expectedResult = createdAccountDto;
@@ -174,8 +175,8 @@ public class AccountServiceTest extends BaseTest {
   @DisplayName("Тест обновления счета в приложении")
   public void updateAccountTest_should_UpdateAccount() {
     when(userService.isExists(USER_ID)).thenReturn(true);
-    when(accountRepository.findAccountById(ACCOUNT_ID)).thenReturn(createdAccount);
-    when(accountRepository.updateAccount(createdAccount)).thenReturn(updatedAccount);
+    when(accountRepository.findAccountById(ACCOUNT_ID)).thenReturn(Optional.of(createdAccount));
+    when(accountRepository.updateAccount(createdAccount)).thenReturn(Optional.of(updatedAccount));
     when(accountConverter.toDto(updatedAccount)).thenReturn(updatedAccountDto);
 
     AccountDto expectedResult = updatedAccountDto;

@@ -1,5 +1,6 @@
 package by.toukach.walletservice.entity;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import lombok.Builder;
 import lombok.Data;
@@ -14,6 +15,6 @@ public class Account {
   private Long id;
   private LocalDateTime createdAt;
   private String title;
-  private Double sum;
+  private BigDecimal sum;
   private Long userId;
 }

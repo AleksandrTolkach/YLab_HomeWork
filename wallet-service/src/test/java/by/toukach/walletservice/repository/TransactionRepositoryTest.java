@@ -14,6 +14,7 @@ import by.toukach.walletservice.repository.impl.TransactionRepositoryImpl;
 import by.toukach.walletservice.repository.impl.UserRepositoryImpl;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -66,17 +67,20 @@ public class TransactionRepositoryTest extends ContainersEnvironment {
   @Test
   @DisplayName("Тест поиска транзакции в БД по ID")
   public void findTransactionByIdTest_should_FindTransaction() {
-    Transaction expectedResult = transaction;
-    Transaction actualResult = transactionRepository.findTransactionById(TRANSACTION_ID);
+    Optional<Transaction> expectedResult = Optional.of(transaction);
+    Optional<Transaction> actualResult = transactionRepository.findTransactionById(TRANSACTION_ID);
 
     assertThat(actualResult).isEqualTo(expectedResult);
   }
 
   @Test
   @DisplayName("Тест поиска транзакции в БД по несуществующему ID")
-  public void findTransactionByIdTest_should_ThrowError_WhenTransactionNotFound() {
-    assertThatThrownBy(() -> transactionRepository.findTransactionById(UN_EXISTING_ID))
-        .isInstanceOf(EntityNotFoundException.class);
+  public void findTransactionByIdTest_should_ReturnEmptyOptional() {
+    Optional<Transaction> expectedResult = Optional.empty();
+    Optional<Transaction> actualResult = transactionRepository.findTransactionById(
+        UN_EXISTING_ID);
+
+    assertThat(actualResult).isEqualTo(expectedResult);
   }
 
   @Test

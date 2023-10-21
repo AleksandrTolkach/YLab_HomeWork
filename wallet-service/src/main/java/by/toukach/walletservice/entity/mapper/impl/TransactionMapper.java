@@ -31,7 +31,7 @@ public class TransactionMapper implements RowMapper<Transaction> {
         .type(TransactionType.valueOf(resultSet.getString(TYPE)))
         .userId(resultSet.getLong(USER_ID))
         .accountId(resultSet.getLong(ACCOUNT_ID))
-        .value(resultSet.getDouble(VALUE))
+        .value(resultSet.getBigDecimal(VALUE))
         .build();
   }
 

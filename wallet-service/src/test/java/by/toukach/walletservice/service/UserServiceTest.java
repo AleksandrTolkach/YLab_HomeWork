@@ -21,6 +21,7 @@ import by.toukach.walletservice.repository.impl.UserRepositoryImpl;
 import by.toukach.walletservice.service.impl.UserServiceImpl;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -117,7 +118,7 @@ public class UserServiceTest extends BaseTest {
   @Test
   @DisplayName("Тест поиска пользователя в приложении по ID")
   public void findUserByIdTest_should_FindUser() {
-    when(userRepository.findUserById(USER_ID)).thenReturn(createdUser);
+    when(userRepository.findUserById(USER_ID)).thenReturn(Optional.of(createdUser));
     when(userConverter.toDto(createdUser)).thenReturn(createdUserDto);
 
     UserDto expectedResult = createdUserDto;
@@ -129,7 +130,7 @@ public class UserServiceTest extends BaseTest {
   @Test
   @DisplayName("Тест поиска пользователя в приложении по несуществующему ID")
   public void findUserByIdTest_should_ThrowError_WhenUserNotExist() {
-    when(userRepository.findUserById(UN_EXISTING_ID)).thenThrow(EntityNotFoundException.class);
+    when(userRepository.findUserById(UN_EXISTING_ID)).thenReturn(Optional.empty());
 
     assertThatThrownBy(() -> userService.findUserById(UN_EXISTING_ID))
         .isInstanceOf(EntityNotFoundException.class);
@@ -138,7 +139,7 @@ public class UserServiceTest extends BaseTest {
   @Test
   @DisplayName("Тест поиска пользователя в приложении по логину")
   public void findUserByLoginTest_should_FindUser() {
-    when(userRepository.findUserByLogin(LOGIN)).thenReturn(createdUser);
+    when(userRepository.findUserByLogin(LOGIN)).thenReturn(Optional.of(createdUser));
     when(userConverter.toDto(createdUser)).thenReturn(createdUserDto);
 
     UserDto expectedResult = createdUserDto;

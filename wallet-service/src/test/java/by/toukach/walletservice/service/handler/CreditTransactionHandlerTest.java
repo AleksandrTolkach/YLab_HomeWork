@@ -110,7 +110,7 @@ public class CreditTransactionHandlerTest extends BaseTest {
   @Test
   @DisplayName("Тест обработки кредитной транзакции с отрицательным значением суммы транзакции")
   public void handleTest_should_ThrowError_WhenPresentsNegativeArgument() {
-    transaction.setValue(-TRANSACTION_VALUE);
+    transaction.setValue(NEGATIVE_TRANSACTION_VALUE);
 
     when(accountService.findAccountById(ACCOUNT_ID)).thenReturn(accountDto);
     when(transactionService.createTransaction(transaction)).thenReturn(transaction);

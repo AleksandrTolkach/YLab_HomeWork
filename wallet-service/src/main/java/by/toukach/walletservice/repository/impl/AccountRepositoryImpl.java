@@ -4,7 +4,6 @@ import by.toukach.walletservice.entity.Account;
 import by.toukach.walletservice.entity.mapper.RowMapper;
 import by.toukach.walletservice.entity.mapper.impl.AccountMapper;
 import by.toukach.walletservice.exception.DbException;
-import by.toukach.walletservice.exception.EntityNotFoundException;
 import by.toukach.walletservice.exception.ExceptionMessage;
 import by.toukach.walletservice.repository.AccountRepository;
 import by.toukach.walletservice.repository.DbInitializer;
@@ -15,6 +14,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Класс для выполнения запросов, связанных со счетом, в память.
@@ -44,7 +44,7 @@ public class AccountRepositoryImpl implements AccountRepository {
 
       statement.setObject(1, account.getCreatedAt());
       statement.setString(2, account.getTitle());
-      statement.setDouble(3, account.getSum());
+      statement.setBigDecimal(3, account.getSum());
       statement.setLong(4, account.getUserId());
 
       statement.execute();
@@ -69,15 +69,10 @@ public class AccountRepositoryImpl implements AccountRepository {
   }
 
   @Override
-  public Account findAccountById(Long id) {
+  public Optional<Account> findAccountById(Long id) {
     List<Account> accountList = findAccountBy(ID, id);
 
-    if (!accountList.isEmpty()) {
-      return accountList.get(0);
-    } else {
-      throw new EntityNotFoundException(
-          String.format(ExceptionMessage.ACCOUNT_BY_ID_NOT_FOUND, id));
-    }
+    return !accountList.isEmpty() ? Optional.of(accountList.get(0)) : Optional.empty();
   }
 
   @Override
@@ -86,7 +81,7 @@ public class AccountRepositoryImpl implements AccountRepository {
   }
 
   @Override
-  public Account updateAccount(Account account) {
+  public Optional<Account> updateAccount(Account account) {
     Connection connection = dbInitializer.getConnection();
     Long id = account.getId();
 
@@ -95,17 +90,12 @@ public class AccountRepositoryImpl implements AccountRepository {
                 + "WHERE id = ?")) {
 
       statement.setString(1, account.getTitle());
-      statement.setDouble(2, account.getSum());
+      statement.setBigDecimal(2, account.getSum());
       statement.setLong(3, id);
 
       int updatedRows = statement.executeUpdate();
 
-      if (updatedRows != 0) {
-        return findAccountById(id);
-      } else {
-        throw new EntityNotFoundException(
-            String.format(ExceptionMessage.ACCOUNT_NOT_FOUND, id));
-      }
+      return updatedRows != 0 ? findAccountById(id) : Optional.empty();
 
     } catch (SQLException e) {
       throw new DbException(ExceptionMessage.ACCOUNT_UPDATE, e);
