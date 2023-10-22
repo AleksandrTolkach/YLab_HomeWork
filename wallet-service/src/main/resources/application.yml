@@ -1,5 +1,5 @@
 database:
-  url: jdbc:postgresql://localhost:5434/wallet
+  url: jdbc:postgresql://localhost:5434/%s
   name: wallet
   username: toukach
   password: ylab

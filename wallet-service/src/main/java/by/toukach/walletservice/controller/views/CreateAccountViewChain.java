@@ -2,6 +2,7 @@ package by.toukach.walletservice.controller.views;
 
 import by.toukach.walletservice.dto.AccountDto;
 import by.toukach.walletservice.dto.UserDto;
+import java.math.BigDecimal;
 import java.util.Scanner;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -25,7 +26,7 @@ public class CreateAccountViewChain extends AccountViewChain {
 
     AccountDto accountDto = AccountDto.builder()
         .title(title)
-        .sum(0.0)
+        .sum(new BigDecimal("0.0"))
         .userId(getUserDto().getId())
         .build();
 

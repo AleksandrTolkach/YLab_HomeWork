@@ -6,6 +6,7 @@ import by.toukach.walletservice.dto.UserDto;
 import by.toukach.walletservice.enumiration.TransactionType;
 import by.toukach.walletservice.exception.ArgumentValueException;
 import by.toukach.walletservice.exception.EntityDuplicateException;
+import java.math.BigDecimal;
 import java.util.Scanner;
 
 /**
@@ -23,7 +24,7 @@ public class CreditAccountViewChain extends TransactionViewChain {
     Scanner scanner = getScanner();
 
     System.out.println(ViewMessage.SUM);
-    double answer = scanner.nextDouble();
+    BigDecimal answer = scanner.nextBigDecimal();
     scanner.nextLine();
 
     TransactionDto transactionDto = TransactionDto.builder()

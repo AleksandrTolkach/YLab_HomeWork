@@ -1,8 +1,0 @@
-database:
-  url: jdbc:postgresql://localhost:5434/wallet
-  name: wallet
-  username: toukach
-  password: ylab
-  driver: org.postgresql.Driver
-  changeLogFile: db/changelog/changelog.xml
-  liquibaseSchema: liquibase

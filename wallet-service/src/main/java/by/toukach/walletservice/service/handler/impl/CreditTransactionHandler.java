@@ -15,6 +15,7 @@ import by.toukach.walletservice.service.impl.AccountServiceImpl;
 import by.toukach.walletservice.service.impl.LoggerServiceImpl;
 import by.toukach.walletservice.service.impl.TransactionServiceImpl;
 import by.toukach.walletservice.utils.LogUtil;
+import java.math.BigDecimal;
 
 /**
  * Класс представляющий обработчик транзакций по начислению средств.
@@ -37,16 +38,16 @@ public class CreditTransactionHandler implements TransactionHandler {
   @Override
   public TransactionDto handle(TransactionDto transactionDto) {
     AccountDto accountDto = accountService.findAccountById(transactionDto.getAccountId());
-    Double value = transactionDto.getValue();
+    BigDecimal value = transactionDto.getValue();
 
-    if (value <= 0) {
+    if (value.compareTo(BigDecimal.ZERO) <= 0) {
       throw new ArgumentValueException(ExceptionMessage.POSITIVE_ARGUMENT);
     }
 
     transactionDto = transactionService.createTransaction(transactionDto);
 
-    Double sum = accountDto.getSum();
-    sum += value;
+    BigDecimal sum = accountDto.getSum();
+    sum = sum.add(value);
     accountDto.setSum(sum);
 
     accountService.updateAccount(accountDto);

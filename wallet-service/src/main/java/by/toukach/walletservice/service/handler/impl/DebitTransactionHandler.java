@@ -16,6 +16,7 @@ import by.toukach.walletservice.service.impl.AccountServiceImpl;
 import by.toukach.walletservice.service.impl.LoggerServiceImpl;
 import by.toukach.walletservice.service.impl.TransactionServiceImpl;
 import by.toukach.walletservice.utils.LogUtil;
+import java.math.BigDecimal;
 
 /**
  * Класс представляющий обработчик транзакций по списанию средств.
@@ -38,21 +39,21 @@ public class DebitTransactionHandler implements TransactionHandler {
   @Override
   public TransactionDto handle(TransactionDto transactionDto) {
     AccountDto account = accountService.findAccountById(transactionDto.getAccountId());
-    Double value = transactionDto.getValue();
+    BigDecimal value = transactionDto.getValue();
 
-    if (value <= 0) {
+    if (value.compareTo(BigDecimal.ZERO) <= 0) {
       throw new ArgumentValueException(ExceptionMessage.POSITIVE_ARGUMENT);
     }
 
-    Double sum = account.getSum();
+    BigDecimal sum = account.getSum();
 
-    if (sum < value) {
+    if (sum.compareTo(value) < 0) {
       throw new InsufficientFundsException(ExceptionMessage.INSUFFICIENT_FUNDS);
     }
 
     transactionDto = transactionService.createTransaction(transactionDto);
 
-    sum -= value;
+    sum = sum.subtract(value);
     account.setSum(sum);
 
     accountService.updateAccount(account);

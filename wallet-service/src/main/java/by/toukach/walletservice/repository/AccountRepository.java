@@ -2,6 +2,7 @@ package by.toukach.walletservice.repository;
 
 import by.toukach.walletservice.entity.Account;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Интерфейс для выполнения запросов, связанных со счетом, в память.
@@ -21,7 +22,7 @@ public interface AccountRepository {
    * @param id id счета.
    * @return запрашиваемый счет.
    */
-  Account findAccountById(Long id);
+  Optional<Account> findAccountById(Long id);
 
   /**
    * Метод для чтения счетов из памяти по ID пользователя.
@@ -37,5 +38,5 @@ public interface AccountRepository {
    * @param account обновляемый счет.
    * @return обновленный счет.
    */
-  Account updateAccount(Account account);
+  Optional<Account> updateAccount(Account account);
 }

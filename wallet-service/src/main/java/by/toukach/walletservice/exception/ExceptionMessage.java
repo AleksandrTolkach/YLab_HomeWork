@@ -31,5 +31,7 @@ public class ExceptionMessage {
   public static final String ACCOUNT_UPDATE = "Не удалось обновить счет в базе\n";
   public static final String SAVE_LOG = "Не удалось сохранить лок в базу данных.\n";
   public static final String SAVE_USER = "Не удалось сохранить пользователя в базу данных.\n";
+  public static final String DB_EXISTS = "База данных уже существует";
+  public static final String SCHEMES_EXISTS = "Схемы уже существуют";
 
 }

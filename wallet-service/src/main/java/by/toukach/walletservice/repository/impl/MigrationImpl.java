@@ -52,12 +52,12 @@ public class MigrationImpl implements Migration {
       updateCommand.execute();
     } catch (DatabaseException | CommandExecutionException e) {
       throw new DbException(ExceptionMessage.MIGRATION, e);
-    }
-
-    try {
-      connection.close();
-    } catch (SQLException e) {
-      throw new DbException(ExceptionMessage.CLOSE_CONNECTION_TO_DB, e);
+    } finally {
+      try {
+        connection.close();
+      } catch (SQLException e) {
+        System.err.println(ExceptionMessage.CLOSE_CONNECTION_TO_DB);
+      }
     }
   }
 
@@ -78,12 +78,12 @@ public class MigrationImpl implements Migration {
           new LabelExpression());
     } catch (LiquibaseException e) {
       throw new DbException(ExceptionMessage.MIGRATION, e);
-    }
-
-    try {
-      connection.close();
-    } catch (SQLException e) {
-      throw new DbException(ExceptionMessage.CLOSE_CONNECTION_TO_DB, e);
+    } finally {
+      try {
+        connection.close();
+      } catch (SQLException e) {
+        System.err.println(ExceptionMessage.CLOSE_CONNECTION_TO_DB);
+      }
     }
   }
 

@@ -60,12 +60,8 @@ public class AccountServiceImpl implements AccountService {
 
   @Override
   public AccountDto findAccountById(Long id) {
-    Account account = accountRepository.findAccountById(id);
-
-    if (account == null) {
-      throw new EntityNotFoundException(
-          String.format(ExceptionMessage.ACCOUNT_BY_ID_NOT_FOUND, id));
-    }
+    Account account = accountRepository.findAccountById(id).orElseThrow(() ->
+        new EntityNotFoundException(String.format(ExceptionMessage.ACCOUNT_BY_ID_NOT_FOUND, id)));
 
     return accountConverter.toDto(account);
   }
@@ -88,17 +84,14 @@ public class AccountServiceImpl implements AccountService {
     }
 
     Long id = accountDto.getId();
-    Account account = accountRepository.findAccountById(id);
-
-    if (account == null) {
-      throw new EntityNotFoundException(
-          String.format(ExceptionMessage.ACCOUNT_BY_ID_NOT_FOUND, id));
-    }
+    Account account = accountRepository.findAccountById(id).orElseThrow(() ->
+        new EntityNotFoundException(String.format(ExceptionMessage.ACCOUNT_BY_ID_NOT_FOUND, id)));
 
     account.setSum(accountDto.getSum());
     account.setTitle(accountDto.getTitle());
 
-    account = accountRepository.updateAccount(account);
+    account = accountRepository.updateAccount(account).orElseThrow(() ->
+        new EntityNotFoundException(String.format(ExceptionMessage.ACCOUNT_BY_ID_NOT_FOUND, id)));
 
     return accountConverter.toDto(account);
   }

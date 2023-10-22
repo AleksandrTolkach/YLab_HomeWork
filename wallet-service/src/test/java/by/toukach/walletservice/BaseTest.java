@@ -11,6 +11,7 @@ import by.toukach.walletservice.entity.Transaction;
 import by.toukach.walletservice.entity.User;
 import by.toukach.walletservice.enumiration.LogType;
 import by.toukach.walletservice.enumiration.TransactionType;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,21 +33,17 @@ public class BaseTest {
   protected static final String UN_EXISTING_LOGIN = "unExistingLogin";
   protected static final long ACCOUNT_ID = 1L;
   protected static final String ACCOUNT_TITLE = "account";
-  protected static final double ACCOUNT_SUM = 10D;
-  protected static final double UPDATED_ACCOUNT_SUM = 10D;
+  protected static final BigDecimal ACCOUNT_SUM = new BigDecimal("10.00");
+  protected static final BigDecimal UPDATED_ACCOUNT_SUM = new BigDecimal("10");
   protected static final long TRANSACTION_ID = 1L;
-  protected static final double TRANSACTION_VALUE = 5D;
-  protected static final double UPDATED_VALUE = ACCOUNT_SUM + TRANSACTION_VALUE;
+  protected static final BigDecimal TRANSACTION_VALUE = new BigDecimal("5.00");
+  protected static final BigDecimal NEGATIVE_TRANSACTION_VALUE = new BigDecimal("-5");
+  protected static final BigDecimal UPDATED_VALUE = ACCOUNT_SUM.add(TRANSACTION_VALUE);
   protected static final String LOG_VALUE = "log";
   protected static final LocalDateTime CREATED_AT =
       LocalDateTime.parse("1970-10-10T10:10:10").withNano(0);
   protected static final Long LOG_ID = 2L;
-  protected static final Double VALUE_BIG_AMOUNT = 100000D;
-  protected static final String DB_IMAGE_VERSION = "postgres:14.2-alpine";
-  protected static final String DB_NAME = "wallet";
-  protected static final String DB_USERNAME = "toukach";
-  protected static final String DB_PASSWORD = "ylab";
-  protected static final String DB_SCRIPT_PATH = "db/create-scheme.sql";
+  protected static final BigDecimal VALUE_BIG_AMOUNT = new BigDecimal("100000.0");
   protected static final String TAG_V_0_0 = "v0.0";
 
   protected User getNewUser() {
@@ -165,7 +162,7 @@ public class BaseTest {
 
   protected AccountDto getUpdatedAccountDto() {
     AccountDto account = getCreatedAccountDto();
-    account.setSum(ACCOUNT_SUM + TRANSACTION_VALUE);
+    account.setSum(ACCOUNT_SUM.add(TRANSACTION_VALUE));
     account.setCreatedAt(CREATED_AT);
     return account;
   }

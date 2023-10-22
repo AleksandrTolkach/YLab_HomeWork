@@ -19,7 +19,7 @@
       </column>
       <column name="created_at" type="TIMESTAMP"/>
       <column name="title" type="VARCHAR(255)"/>
-      <column name="sum" type="DOUBLE"/>
+      <column name="sum" type="DECIMAL(10, 2)"/>
       <column name="user_id" type="BIGINT">
       </column>
     </createTable>

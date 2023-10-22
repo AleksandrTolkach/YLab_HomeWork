@@ -23,7 +23,7 @@
       </column>
       <column name="user_id" type="BIGINT"/>
       <column name="account_id" type="BIGINT"/>
-      <column name="value" type="DOUBLE"/>
+      <column name="value" type="DECIMAL(10, 2)"/>
     </createTable>
     <addForeignKeyConstraint
       baseTableSchemaName="application"

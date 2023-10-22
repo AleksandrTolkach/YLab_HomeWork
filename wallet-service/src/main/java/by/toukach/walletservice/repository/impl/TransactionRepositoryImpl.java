@@ -4,7 +4,6 @@ import by.toukach.walletservice.entity.Transaction;
 import by.toukach.walletservice.entity.mapper.RowMapper;
 import by.toukach.walletservice.entity.mapper.impl.TransactionMapper;
 import by.toukach.walletservice.exception.DbException;
-import by.toukach.walletservice.exception.EntityNotFoundException;
 import by.toukach.walletservice.exception.ExceptionMessage;
 import by.toukach.walletservice.repository.DbInitializer;
 import by.toukach.walletservice.repository.TransactionRepository;
@@ -15,6 +14,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Класс для выполнения запросов, связанных с операциями, в память.
@@ -48,7 +48,7 @@ public class TransactionRepositoryImpl implements TransactionRepository {
       statement.setString(2, transaction.getType().name());
       statement.setDouble(3, transaction.getUserId());
       statement.setDouble(4, transaction.getAccountId());
-      statement.setDouble(5, transaction.getValue());
+      statement.setBigDecimal(5, transaction.getValue());
 
       statement.execute();
 
@@ -71,14 +71,10 @@ public class TransactionRepositoryImpl implements TransactionRepository {
   }
 
   @Override
-  public Transaction findTransactionById(Long id) {
+  public Optional<Transaction> findTransactionById(Long id) {
     List<Transaction> transactionList = findTransactionsBy(ID, id);
 
-    if (!transactionList.isEmpty()) {
-      return transactionList.get(0);
-    } else {
-      throw new EntityNotFoundException(String.format(ExceptionMessage.TRANSACTION_NOT_FOUND, id));
-    }
+    return !transactionList.isEmpty() ? Optional.of(transactionList.get(0)) : Optional.empty();
   }
 
   @Override

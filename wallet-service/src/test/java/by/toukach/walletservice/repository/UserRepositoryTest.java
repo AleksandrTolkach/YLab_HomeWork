@@ -9,6 +9,7 @@ import by.toukach.walletservice.entity.User;
 import by.toukach.walletservice.exception.EntityNotFoundException;
 import by.toukach.walletservice.repository.impl.MigrationImpl;
 import by.toukach.walletservice.repository.impl.UserRepositoryImpl;
+import java.util.Optional;
 import org.junit.Rule;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -57,33 +58,37 @@ public class UserRepositoryTest extends ContainersEnvironment {
   @Test
   @DisplayName("Тест поиска пользователя в БД по ID")
   public void findUserByIdTest_should_FindUser() {
-    User expectedResult = admin;
-    User actualResult = userRepository.findUserById(ADMIN_ID);
+    Optional<User> expectedResult = Optional.of(admin);
+    Optional<User> actualResult = userRepository.findUserById(ADMIN_ID);
 
     assertThat(actualResult).isEqualTo(expectedResult);
   }
 
   @Test
   @DisplayName("Тест поиска пользователя в БД по несуществующему ID")
-  public void findUserByIdTest_should_ThrowError_WhenUserNotFound() {
-    assertThatThrownBy(() -> userRepository.findUserById(UN_EXISTING_ID))
-        .isInstanceOf(EntityNotFoundException.class);
+  public void findUserByIdTest_should_ReturnEmptyOptional() {
+    Optional<User> expectedResult = Optional.empty();
+    Optional<User> actualResult = userRepository.findUserById(UN_EXISTING_ID);
+
+    assertThat(actualResult).isEqualTo(expectedResult);
   }
 
   @Test
   @DisplayName("Тест поиска пользователя по логину")
   public void findUserByLoginTest_should_FindUser() {
-    User expectedResult = admin;
-    User actualResult = userRepository.findUserByLogin(ADMIN_LOGIN);
+    Optional<User> expectedResult = Optional.of(admin);
+    Optional<User> actualResult = userRepository.findUserByLogin(ADMIN_LOGIN);
 
     assertThat(actualResult).isEqualTo(expectedResult);
   }
 
   @Test
   @DisplayName("Тест поиска пользователя по несуществующему логину")
-  public void findUserByLoginTest_should_ThrowError_WhenUserNotExist() {
-    assertThatThrownBy(() -> userRepository.findUserByLogin(UN_EXISTING_LOGIN))
-        .isInstanceOf(EntityNotFoundException.class);
+  public void findUserByLoginTest_should_ReturnEmptyOptional() {
+    Optional<User> expectedResult = Optional.empty();
+    Optional<User> actualResult = userRepository.findUserByLogin(UN_EXISTING_LOGIN);
+
+    assertThat(actualResult).isEqualTo(expectedResult);
   }
 
   @Test

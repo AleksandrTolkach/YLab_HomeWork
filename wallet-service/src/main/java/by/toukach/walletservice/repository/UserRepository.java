@@ -1,6 +1,7 @@
 package by.toukach.walletservice.repository;
 
 import by.toukach.walletservice.entity.User;
+import java.util.Optional;
 
 /**
  * Интерфейс для выполнения запросов, связанных с пользователями, в память.
@@ -21,7 +22,7 @@ public interface UserRepository {
    * @param id id запрашиваемого пользователя.
    * @return запрашиваемый пользователь.
    */
-  User findUserById(Long id);
+  Optional<User> findUserById(Long id);
 
   /**
    * Метод для чтения пользователя из памяти по логину.
@@ -29,7 +30,7 @@ public interface UserRepository {
    * @param login логин запрашиваемого пользователя.
    * @return запрашиваемый пользователь.
    */
-  User findUserByLogin(String login);
+  Optional<User> findUserByLogin(String login);
 
   /**
    * Метод для проверки существования пользователя в памяти по id.

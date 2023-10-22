@@ -27,7 +27,7 @@ public class AccountMapper implements RowMapper<Account> {
         .id(resultSet.getLong(ID))
         .createdAt(resultSet.getObject(CREATED_AT, LocalDateTime.class))
         .title(resultSet.getString(TITLE))
-        .sum(resultSet.getDouble(SUM))
+        .sum(resultSet.getBigDecimal(SUM))
         .userId(resultSet.getLong(USER_ID))
         .build();
   }
