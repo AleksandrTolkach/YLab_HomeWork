@@ -9,6 +9,7 @@
       <column name="created_at" value="1970-10-10T10:10:10"/>
       <column name="login" value="admin"/>
       <column name="password" value="admin"/>
+      <column name="role" value="ADMIN"/>
     </insert>
     <rollback/>
   </changeSet>

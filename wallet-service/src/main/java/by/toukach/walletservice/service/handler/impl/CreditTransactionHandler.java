@@ -1,21 +1,23 @@
 package by.toukach.walletservice.service.handler.impl;
 
+import by.toukach.walletservice.aspect.annotation.Loggable;
 import by.toukach.walletservice.dto.AccountDto;
 import by.toukach.walletservice.dto.TransactionDto;
-import by.toukach.walletservice.entity.Log;
+import by.toukach.walletservice.dto.UserDto;
 import by.toukach.walletservice.enumiration.LogType;
 import by.toukach.walletservice.enumiration.TransactionType;
 import by.toukach.walletservice.exception.ArgumentValueException;
+import by.toukach.walletservice.exception.EntityConflictException;
+import by.toukach.walletservice.exception.EntityNotFoundException;
 import by.toukach.walletservice.exception.ExceptionMessage;
+import by.toukach.walletservice.security.SecurityContext;
 import by.toukach.walletservice.service.AccountService;
-import by.toukach.walletservice.service.LoggerService;
 import by.toukach.walletservice.service.TransactionService;
 import by.toukach.walletservice.service.handler.TransactionHandler;
 import by.toukach.walletservice.service.impl.AccountServiceImpl;
-import by.toukach.walletservice.service.impl.LoggerServiceImpl;
 import by.toukach.walletservice.service.impl.TransactionServiceImpl;
-import by.toukach.walletservice.utils.LogUtil;
 import java.math.BigDecimal;
+import java.util.Optional;
 
 /**
  * Класс представляющий обработчик транзакций по начислению средств.
@@ -24,7 +26,6 @@ public class CreditTransactionHandler implements TransactionHandler {
 
   private final TransactionService transactionService;
   private final AccountService accountService;
-  private final LoggerService loggerService;
 
   /**
    * Конструктор для создания обработчика транзакций по начислению средств.
@@ -32,12 +33,25 @@ public class CreditTransactionHandler implements TransactionHandler {
   public CreditTransactionHandler() {
     transactionService = TransactionServiceImpl.getInstance();
     accountService = AccountServiceImpl.getInstance();
-    loggerService = LoggerServiceImpl.getInstance();
   }
 
   @Override
+  @Loggable(type = LogType.CREDIT)
   public TransactionDto handle(TransactionDto transactionDto) {
     AccountDto accountDto = accountService.findAccountById(transactionDto.getAccountId());
+
+    UserDto currentUser = SecurityContext.getCurrentUser();
+    Optional<AccountDto> optionalAccountDtoOfCurrentUser = currentUser.getAccountList().stream()
+        .filter(a -> a.getId().equals(accountDto.getId()))
+        .findFirst();
+
+    if (!currentUser.getId().equals(transactionDto.getUserId())) {
+      throw new EntityConflictException(ExceptionMessage.ELSE_USER);
+    } else if (optionalAccountDtoOfCurrentUser.isEmpty()) {
+      throw new EntityNotFoundException(
+          String.format(ExceptionMessage.ACCOUNT_NOT_FOUND, transactionDto.getAccountId()));
+    }
+
     BigDecimal value = transactionDto.getValue();
 
     if (value.compareTo(BigDecimal.ZERO) <= 0) {
@@ -51,11 +65,6 @@ public class CreditTransactionHandler implements TransactionHandler {
     accountDto.setSum(sum);
 
     accountService.updateAccount(accountDto);
-
-    Log log = LogUtil.prepareLog(LogType.TRANSACTION,
-        String.format(LogUtil.CREDIT, transactionDto.getUserId(), transactionDto.getAccountId(),
-            transactionDto.getValue()));
-    loggerService.createLog(log);
 
     return transactionDto;
   }

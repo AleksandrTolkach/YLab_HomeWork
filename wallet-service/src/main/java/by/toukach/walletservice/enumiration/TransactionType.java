@@ -1,12 +1,16 @@
 package by.toukach.walletservice.enumiration;
 
+import com.fasterxml.jackson.annotation.JsonEnumDefaultValue;
+
 /**
  * Перечисление возможных операций в банке.
  * */
 public enum TransactionType {
 
   DEBIT("Снятие"),
-  CREDIT("Пополнение");
+  CREDIT("Пополнение"),
+  @JsonEnumDefaultValue
+  UNKNOWN("Неизвестная");
 
   private final String value;
 

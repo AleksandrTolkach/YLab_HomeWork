@@ -1,20 +1,20 @@
 package by.toukach.walletservice.service.impl;
 
+import by.toukach.walletservice.aspect.annotation.Loggable;
 import by.toukach.walletservice.dto.AccountDto;
 import by.toukach.walletservice.dto.UserDto;
 import by.toukach.walletservice.entity.Account;
-import by.toukach.walletservice.entity.Log;
-import by.toukach.walletservice.entity.converter.Converter;
-import by.toukach.walletservice.entity.converter.impl.AccountConverter;
+import by.toukach.walletservice.entity.mapper.AccountMapper;
 import by.toukach.walletservice.enumiration.LogType;
 import by.toukach.walletservice.exception.EntityNotFoundException;
 import by.toukach.walletservice.exception.ExceptionMessage;
 import by.toukach.walletservice.repository.AccountRepository;
 import by.toukach.walletservice.repository.impl.AccountRepositoryImpl;
 import by.toukach.walletservice.service.AccountService;
-import by.toukach.walletservice.service.LoggerService;
 import by.toukach.walletservice.service.UserService;
-import by.toukach.walletservice.utils.LogUtil;
+import by.toukach.walletservice.validator.Validator;
+import by.toukach.walletservice.validator.impl.AccountDtoValidator;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -27,33 +27,33 @@ public class AccountServiceImpl implements AccountService {
   private static final AccountService instance = new AccountServiceImpl();
 
   private final AccountRepository accountRepository;
-  private final Converter<Account, AccountDto> accountConverter;
   private final UserService userService;
-  private final LoggerService loggerService;
+  private final Validator<AccountDto> accountDtoValidator;
+  private final AccountMapper accountMapper;
 
   private AccountServiceImpl() {
     accountRepository = AccountRepositoryImpl.getInstance();
-    accountConverter = AccountConverter.getInstance();
     userService = UserServiceImpl.getInstance();
-    loggerService = LoggerServiceImpl.getInstance();
+    accountDtoValidator = AccountDtoValidator.getInstance();
+    accountMapper = AccountMapper.instance;
   }
 
   @Override
+  @Loggable(type = LogType.CREATE_ACCOUNT)
   public AccountDto createAccount(AccountDto accountDto) {
+    accountDtoValidator.validate(accountDto);
     UserDto userDto = userService.findUserById(accountDto.getUserId());
 
     if (userDto == null) {
       throw new EntityNotFoundException(ExceptionMessage.USER_BY_ID_NOT_FOUND);
     } else {
       accountDto.setCreatedAt(LocalDateTime.now());
+      accountDto.setSum(BigDecimal.ZERO);
 
-      Account account = accountRepository.createAccount(accountConverter.toEntity(accountDto));
-      accountDto = accountConverter.toDto(account);
+      Account account =
+          accountRepository.createAccount(accountMapper.accountDtoToAccount(accountDto));
+      accountDto = accountMapper.accountToAccountDto(account);
 
-      Log log = LogUtil.prepareLog(LogType.ACCOUNT, String.format(LogUtil.CREATE_ACCOUNT,
-          userDto.getId(), accountDto.getId()));
-
-      loggerService.createLog(log);
       return accountDto;
     }
   }
@@ -63,14 +63,14 @@ public class AccountServiceImpl implements AccountService {
     Account account = accountRepository.findAccountById(id).orElseThrow(() ->
         new EntityNotFoundException(String.format(ExceptionMessage.ACCOUNT_BY_ID_NOT_FOUND, id)));
 
-    return accountConverter.toDto(account);
+    return accountMapper.accountToAccountDto(account);
   }
 
   @Override
   public List<AccountDto> findAccountsByUserId(Long userId) {
     return accountRepository.findAccountsByUserId(userId)
         .stream()
-        .map(accountConverter::toDto)
+        .map(accountMapper::accountToAccountDto)
         .collect(Collectors.toList());
   }
 
@@ -93,7 +93,7 @@ public class AccountServiceImpl implements AccountService {
     account = accountRepository.updateAccount(account).orElseThrow(() ->
         new EntityNotFoundException(String.format(ExceptionMessage.ACCOUNT_BY_ID_NOT_FOUND, id)));
 
-    return accountConverter.toDto(account);
+    return accountMapper.accountToAccountDto(account);
   }
 
   public static AccountService getInstance() {

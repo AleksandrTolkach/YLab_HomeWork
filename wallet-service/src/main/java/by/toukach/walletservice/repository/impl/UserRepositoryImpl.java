@@ -1,8 +1,8 @@
 package by.toukach.walletservice.repository.impl;
 
 import by.toukach.walletservice.entity.User;
-import by.toukach.walletservice.entity.mapper.RowMapper;
-import by.toukach.walletservice.entity.mapper.impl.UserMapper;
+import by.toukach.walletservice.entity.rowmapper.RowMapper;
+import by.toukach.walletservice.entity.rowmapper.impl.UserRowMapper;
 import by.toukach.walletservice.exception.DbException;
 import by.toukach.walletservice.exception.ExceptionMessage;
 import by.toukach.walletservice.repository.DbInitializer;
@@ -27,7 +27,7 @@ public class UserRepositoryImpl implements UserRepository {
 
   private UserRepositoryImpl() {
     dbInitializer = DbInitializerImpl.getInstance();
-    userRowMapper = UserMapper.getInstance();
+    userRowMapper = UserRowMapper.getInstance();
   }
 
   @Override
@@ -35,12 +35,13 @@ public class UserRepositoryImpl implements UserRepository {
     Connection connection = dbInitializer.getConnection();
 
     try (PreparedStatement statement = connection.prepareStatement(
-        "INSERT INTO application.users (created_at, login, password) "
-            + "VALUES (?, ?, ?) RETURNING ID")) {
+        "INSERT INTO application.users (created_at, login, password, role) "
+            + "VALUES (?, ?, ?, ?) RETURNING ID")) {
 
       statement.setObject(1, user.getCreatedAt());
       statement.setObject(2, user.getLogin());
       statement.setObject(3, user.getPassword());
+      statement.setObject(4, user.getRole().name());
 
       statement.execute();
 
@@ -91,7 +92,7 @@ public class UserRepositoryImpl implements UserRepository {
     Connection connection = dbInitializer.getConnection();
 
     try (PreparedStatement statement = connection.prepareStatement(
-            "SELECT users.id, users.created_at, login, password, "
+            "SELECT users.id, users.created_at, login, password, role, "
                 + "accounts.id AS account_id, accounts.created_at AS account_created_at, "
                 + "title AS account_title, sum AS account_sum, user_id "
                 + "FROM application.users AS users "
