@@ -32,18 +32,14 @@ public class AccountRepositoryTest extends ContainersEnvironment {
     migration = MigrationImpl.getInstance();
     migration.migrate();
 
-
-
     accountRepository = AccountRepositoryImpl.getInstance();
     userRepository = UserRepositoryImpl.getInstance();
-
-
 
     createdAccount = getCreatedAccount();
     newAccount = getNewAccount();
     updatedAccount = getUpdatedAccount();
     unExistingAccount = getUnExistingAccount();
-    user = getNewUser();
+    user = getNewUserWithRole();
 
     userRepository.createUser(user);
     accountRepository.createAccount(newAccount);

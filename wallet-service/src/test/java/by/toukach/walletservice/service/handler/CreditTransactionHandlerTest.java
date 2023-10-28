@@ -8,15 +8,18 @@ import static org.mockito.Mockito.when;
 import by.toukach.walletservice.BaseTest;
 import by.toukach.walletservice.dto.AccountDto;
 import by.toukach.walletservice.dto.TransactionDto;
+import by.toukach.walletservice.dto.UserDto;
 import by.toukach.walletservice.entity.Log;
 import by.toukach.walletservice.enumiration.TransactionType;
 import by.toukach.walletservice.exception.ArgumentValueException;
 import by.toukach.walletservice.exception.EntityDuplicateException;
 import by.toukach.walletservice.exception.EntityNotFoundException;
+import by.toukach.walletservice.security.SecurityContext;
 import by.toukach.walletservice.service.handler.impl.CreditTransactionHandler;
 import by.toukach.walletservice.service.impl.AccountServiceImpl;
 import by.toukach.walletservice.service.impl.LoggerServiceImpl;
 import by.toukach.walletservice.service.impl.TransactionServiceImpl;
+import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -42,17 +45,21 @@ public class CreditTransactionHandlerTest extends BaseTest {
   private MockedStatic<TransactionServiceImpl> transactionServiceMock;
   private MockedStatic<AccountServiceImpl> accountServiceMock;
   private MockedStatic<LoggerServiceImpl> loggerServiceMock;
+  private MockedStatic<SecurityContext> securityContextMock;
   private TransactionDto transaction;
   private AccountDto accountDto;
   private Log newLog;
   private Log createdLog;
+  private UserDto userDto;
 
   @BeforeEach
   public void setUp() {
-    transaction = getTransactionDto();
+    transaction = getCreditTransactionDto();
     accountDto = getCreatedAccountDto();
     newLog = getNewLog();
     createdLog = getCreatedLog();
+    userDto = getCreatedUserDto();
+    userDto.setAccountList(List.of(accountDto));
 
     transactionServiceMock = mockStatic(TransactionServiceImpl.class);
     transactionServiceMock.when(TransactionServiceImpl::getInstance).thenReturn(transactionService);
@@ -63,6 +70,9 @@ public class CreditTransactionHandlerTest extends BaseTest {
     loggerServiceMock = mockStatic(LoggerServiceImpl.class);
     loggerServiceMock.when(LoggerServiceImpl::getInstance).thenReturn(loggerService);
 
+    securityContextMock = mockStatic(SecurityContext.class);
+    securityContextMock.when(SecurityContext::getCurrentUser).thenReturn(userDto);
+
     creditTransactionHandler = new CreditTransactionHandler();
   }
 
@@ -71,6 +81,7 @@ public class CreditTransactionHandlerTest extends BaseTest {
     transactionServiceMock.close();
     accountServiceMock.close();
     loggerServiceMock.close();
+    securityContextMock.close();
   }
 
   @Test

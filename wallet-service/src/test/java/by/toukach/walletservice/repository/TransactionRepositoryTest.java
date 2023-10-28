@@ -41,7 +41,7 @@ public class TransactionRepositoryTest extends ContainersEnvironment {
     userRepository = UserRepositoryImpl.getInstance();
     accountRepository = AccountRepositoryImpl.getInstance();
     transaction = getTransaction();
-    user = getNewUser();
+    user = getNewUserWithRole();
     account = getNewAccount();
 
     userRepository.createUser(user);

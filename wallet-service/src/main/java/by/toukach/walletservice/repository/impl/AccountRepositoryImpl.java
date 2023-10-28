@@ -1,8 +1,8 @@
 package by.toukach.walletservice.repository.impl;
 
 import by.toukach.walletservice.entity.Account;
-import by.toukach.walletservice.entity.mapper.RowMapper;
-import by.toukach.walletservice.entity.mapper.impl.AccountMapper;
+import by.toukach.walletservice.entity.rowmapper.RowMapper;
+import by.toukach.walletservice.entity.rowmapper.impl.AccountRowMapper;
 import by.toukach.walletservice.exception.DbException;
 import by.toukach.walletservice.exception.ExceptionMessage;
 import by.toukach.walletservice.repository.AccountRepository;
@@ -30,7 +30,7 @@ public class AccountRepositoryImpl implements AccountRepository {
 
   private AccountRepositoryImpl() {
     dbInitializer = DbInitializerImpl.getInstance();
-    accountRowMapper = AccountMapper.getInstance();
+    accountRowMapper = AccountRowMapper.getInstance();
   }
 
   @Override

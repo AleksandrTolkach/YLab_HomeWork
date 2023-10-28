@@ -1,8 +1,8 @@
 package by.toukach.walletservice.repository.impl;
 
 import by.toukach.walletservice.entity.Transaction;
-import by.toukach.walletservice.entity.mapper.RowMapper;
-import by.toukach.walletservice.entity.mapper.impl.TransactionMapper;
+import by.toukach.walletservice.entity.rowmapper.RowMapper;
+import by.toukach.walletservice.entity.rowmapper.impl.TransactionRowMapper;
 import by.toukach.walletservice.exception.DbException;
 import by.toukach.walletservice.exception.ExceptionMessage;
 import by.toukach.walletservice.repository.DbInitializer;
@@ -30,7 +30,7 @@ public class TransactionRepositoryImpl implements TransactionRepository {
 
   private TransactionRepositoryImpl() {
     dbInitializer = DbInitializerImpl.getInstance();
-    transactionRowMapper = TransactionMapper.getInstance();
+    transactionRowMapper = TransactionRowMapper.getInstance();
   }
 
   @Override

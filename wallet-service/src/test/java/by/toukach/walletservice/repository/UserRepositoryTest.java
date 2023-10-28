@@ -37,7 +37,7 @@ public class UserRepositoryTest extends ContainersEnvironment {
 
     userRepository = UserRepositoryImpl.getInstance();
     admin = getAdmin();
-    newUser = getNewUser();
+    newUser = getNewUserWithRole();
     createdUser = getCreatedUser();
   }
 

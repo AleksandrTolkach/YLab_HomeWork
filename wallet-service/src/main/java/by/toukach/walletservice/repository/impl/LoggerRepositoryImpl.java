@@ -1,8 +1,8 @@
 package by.toukach.walletservice.repository.impl;
 
 import by.toukach.walletservice.entity.Log;
-import by.toukach.walletservice.entity.mapper.RowMapper;
-import by.toukach.walletservice.entity.mapper.impl.LogMapper;
+import by.toukach.walletservice.entity.rowmapper.RowMapper;
+import by.toukach.walletservice.entity.rowmapper.impl.LogRowMapper;
 import by.toukach.walletservice.exception.DbException;
 import by.toukach.walletservice.exception.ExceptionMessage;
 import by.toukach.walletservice.repository.DbInitializer;
@@ -27,7 +27,7 @@ public class LoggerRepositoryImpl implements LoggerRepository {
 
   private LoggerRepositoryImpl() {
     dbInitializer = DbInitializerImpl.getInstance();
-    logRowMapper = LogMapper.getInstance();
+    logRowMapper = LogRowMapper.getInstance();
   }
 
   @Override
@@ -39,7 +39,7 @@ public class LoggerRepositoryImpl implements LoggerRepository {
             + "VALUES (?, ?, ?) RETURNING ID")) {
 
       statement.setObject(1, log.getType().name());
-      statement.setObject(2, log.getValue());
+      statement.setObject(2, log.getMessage());
       statement.setObject(3, log.getCreatedAt());
 
       statement.execute();
