@@ -21,20 +21,19 @@ import liquibase.exception.CommandExecutionException;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.resource.ClassLoaderResourceAccessor;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
 
 /**
  * Класс для работы с инструментами миграции БД.
  */
+@Repository
+@RequiredArgsConstructor
 public class MigrationImpl implements Migration {
 
-  private static final Migration instance = new MigrationImpl();
   private final DbInitializer dbInitializer;
   private static final String CHANGE_LOG_FILE_PATH =
       ConfigParamProvider.getParam(ConfigParamVar.DB_CHANGE_LOG_FILE);
-
-  private MigrationImpl() {
-    dbInitializer = DbInitializerImpl.getInstance();
-  }
 
   @Override
   public void migrate() {
@@ -85,9 +84,5 @@ public class MigrationImpl implements Migration {
         System.err.println(ExceptionMessage.CLOSE_CONNECTION_TO_DB);
       }
     }
-  }
-
-  public static Migration getInstance() {
-    return instance;
   }
 }

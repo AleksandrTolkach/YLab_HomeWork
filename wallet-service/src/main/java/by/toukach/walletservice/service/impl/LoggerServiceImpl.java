@@ -1,35 +1,34 @@
 package by.toukach.walletservice.service.impl;
 
+import by.toukach.walletservice.dto.LogDto;
 import by.toukach.walletservice.entity.Log;
+import by.toukach.walletservice.entity.mapper.LogMapper;
 import by.toukach.walletservice.repository.LoggerRepository;
-import by.toukach.walletservice.repository.impl.LoggerRepositoryImpl;
 import by.toukach.walletservice.service.LoggerService;
 import java.util.List;
+import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
 /**
  * Класс для выполнения операций с логами.
  * */
+@Component
+@RequiredArgsConstructor
 public class LoggerServiceImpl implements LoggerService {
 
-  private static final LoggerService instance = new LoggerServiceImpl();
-
   private final LoggerRepository loggerRepository;
+  private final LogMapper logMapper;
 
-  private LoggerServiceImpl() {
-    loggerRepository = LoggerRepositoryImpl.getInstance();
+  @Override
+  public LogDto createLog(LogDto logDto) {
+    Log log = loggerRepository.createLog(logMapper.logDtoToLog(logDto));
+    return logMapper.logToLogDto(log);
   }
 
   @Override
-  public Log createLog(Log log) {
-    return loggerRepository.createLog(log);
-  }
-
-  @Override
-  public List<Log> findLogs() {
-    return loggerRepository.findLogs();
-  }
-
-  public static LoggerService getInstance() {
-    return instance;
+  public List<LogDto> findLogs() {
+    return loggerRepository.findLogs().stream().map(logMapper::logToLogDto)
+        .collect(Collectors.toList());
   }
 }

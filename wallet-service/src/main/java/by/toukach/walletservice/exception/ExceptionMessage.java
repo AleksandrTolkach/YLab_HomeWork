@@ -33,5 +33,20 @@ public class ExceptionMessage {
   public static final String SAVE_USER = "Не удалось сохранить пользователя в базу данных.\n";
   public static final String DB_EXISTS = "База данных уже существует";
   public static final String SCHEMES_EXISTS = "Схемы уже существуют";
-
+  public static final String POJO_MAP = "Не удалось преобразовать json в объект";
+  public static final String JSON_MAP = "Не удалось преобразовать объект в json";
+  public static final String PARAM_NOT_PROVIDED = "Не передан параметр %s";
+  public static final String SESSION_EXPIRED =
+      "Сессия истекла. Пожалуйста, выполните вход в приложение";
+  public static final String LOGIN_OFFER =
+      "Пожалуйста, зарегистрируйтесь или выполните вход в приложение";
+  public static final String ACCESS_DENIED = "Недостаточно прав";
+  public static final String PARAMS_NOT_PROVIDED = "Не переданы параметры %s";
+  public static final String WRONG_OBJECT = "Не передан объект %s";
+  public static final String WRONG_ACCOUNT = String.format(WRONG_OBJECT, "счета");
+  public static final String WRONG_LOG_IN = String.format(WRONG_OBJECT, "logIn");
+  public static final String WRONG_SIGN_UP = String.format(WRONG_OBJECT, "signUp");
+  public static final String WRONG_TRANSACTION = String.format(WRONG_OBJECT, "транзакции");
+  public static final String SOMEONE_ELSE_ACCOUNT = "У вас нет прав для работы с указанным счетом";
+  public static final String ELSE_USER = "У вас нет прав для работы с указанным пользователем";
 }

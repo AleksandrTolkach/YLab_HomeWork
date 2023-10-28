@@ -29,21 +29,16 @@ public class AccountRepositoryTest extends ContainersEnvironment {
   public void setUp() throws NoSuchFieldException, IllegalAccessException {
     injectTestJdbcUrl();
 
-    migration = MigrationImpl.getInstance();
     migration.migrate();
 
-
-
-    accountRepository = AccountRepositoryImpl.getInstance();
-    userRepository = UserRepositoryImpl.getInstance();
-
-
+//    accountRepository = AccountRepositoryImpl.getInstance();
+//    userRepository = UserRepositoryImpl.getInstance();
 
     createdAccount = getCreatedAccount();
     newAccount = getNewAccount();
     updatedAccount = getUpdatedAccount();
     unExistingAccount = getUnExistingAccount();
-    user = getNewUser();
+    user = getNewUserWithRole();
 
     userRepository.createUser(user);
     accountRepository.createAccount(newAccount);

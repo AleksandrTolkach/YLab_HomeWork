@@ -9,13 +9,15 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import org.springframework.stereotype.Component;
 
 /**
  * Класс для настройки соединений к базе и предоставляющий Connection.
  */
+@Component
 public class DbInitializerImpl implements DbInitializer {
 
-  private static DbInitializer instance = new DbInitializerImpl();
+  private String dbDriver;
 
   private DbInitializerImpl() {
     try {
@@ -23,7 +25,24 @@ public class DbInitializerImpl implements DbInitializer {
     } catch (ClassNotFoundException e) {
       throw new DbException(ExceptionMessage.DB_DRIVER_DID_NOT_LOAD, e);
     }
+  }
 
+  @Override
+  public Connection getConnection() {
+    String url = ConfigParamProvider.getParam(ConfigParamVar.DB_URL);
+    String dbName = ConfigParamProvider.getParam(ConfigParamVar.DB_NAME);
+    String username = ConfigParamProvider.getParam(ConfigParamVar.DB_USERNAME);
+    String password = ConfigParamProvider.getParam(ConfigParamVar.DB_PASSWORD);
+
+    try {
+      return DriverManager.getConnection(String.format(url, dbName), username, password);
+    } catch (SQLException e) {
+      throw new DbException(ExceptionMessage.CONNECT_TO_DB, e);
+    }
+  }
+
+  @Override
+  public void prepareDb() {
     String url = ConfigParamProvider.getParam(ConfigParamVar.DB_URL);
     String dbName = ConfigParamProvider.getParam(ConfigParamVar.DB_NAME);
     String username = ConfigParamProvider.getParam(ConfigParamVar.DB_USERNAME);
@@ -47,23 +66,5 @@ public class DbInitializerImpl implements DbInitializer {
     } catch (SQLException e) {
       System.err.println(ExceptionMessage.SCHEMES_EXISTS);
     }
-  }
-
-  @Override
-  public Connection getConnection() {
-    String url = ConfigParamProvider.getParam(ConfigParamVar.DB_URL);
-    String dbName = ConfigParamProvider.getParam(ConfigParamVar.DB_NAME);
-    String username = ConfigParamProvider.getParam(ConfigParamVar.DB_USERNAME);
-    String password = ConfigParamProvider.getParam(ConfigParamVar.DB_PASSWORD);
-
-    try {
-      return DriverManager.getConnection(String.format(url, dbName), username, password);
-    } catch (SQLException e) {
-      throw new DbException(ExceptionMessage.CONNECT_TO_DB, e);
-    }
-  }
-
-  public static DbInitializer getInstance() {
-    return instance;
   }
 }

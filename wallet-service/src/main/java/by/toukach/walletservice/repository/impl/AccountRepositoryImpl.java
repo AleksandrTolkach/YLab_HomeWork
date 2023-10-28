@@ -1,8 +1,8 @@
 package by.toukach.walletservice.repository.impl;
 
 import by.toukach.walletservice.entity.Account;
-import by.toukach.walletservice.entity.mapper.RowMapper;
-import by.toukach.walletservice.entity.mapper.impl.AccountMapper;
+import by.toukach.walletservice.entity.rowmapper.RowMapper;
+import by.toukach.walletservice.entity.rowmapper.impl.AccountRowMapper;
 import by.toukach.walletservice.exception.DbException;
 import by.toukach.walletservice.exception.ExceptionMessage;
 import by.toukach.walletservice.repository.AccountRepository;
@@ -15,23 +15,21 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
 
 /**
  * Класс для выполнения запросов, связанных со счетом, в память.
  */
+@Repository
+@RequiredArgsConstructor
 public class AccountRepositoryImpl implements AccountRepository {
 
-  private static final AccountRepository instance = new AccountRepositoryImpl();
   private static final String ID = "id";
   private static final String USER_ID = "user_id";
 
   private final DbInitializer dbInitializer;
   private final RowMapper<Account> accountRowMapper;
-
-  private AccountRepositoryImpl() {
-    dbInitializer = DbInitializerImpl.getInstance();
-    accountRowMapper = AccountMapper.getInstance();
-  }
 
   @Override
   public Account createAccount(Account account) {
@@ -107,11 +105,6 @@ public class AccountRepositoryImpl implements AccountRepository {
       }
     }
   }
-
-  public static AccountRepository getInstance() {
-    return instance;
-  }
-
 
   private List<Account> findAccountBy(String argumentName, Object argumentValue) {
     Connection connection = dbInitializer.getConnection();

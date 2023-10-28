@@ -1,6 +1,6 @@
 package by.toukach.walletservice.service;
 
-import by.toukach.walletservice.entity.Log;
+import by.toukach.walletservice.dto.LogDto;
 import java.util.List;
 
 /**
@@ -14,12 +14,12 @@ public interface LoggerService {
    * @param log записываемый лог.
    * @return записанный лог.
    */
-  Log createLog(Log log);
+  LogDto createLog(LogDto log);
 
   /**
    * Метод для чтения логов из памяти.
    *
    * @return запрашиваемые логи.
    */
-  List<Log> findLogs();
+  List<LogDto> findLogs();
 }

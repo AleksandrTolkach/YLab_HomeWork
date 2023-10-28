@@ -11,7 +11,7 @@ import org.yaml.snakeyaml.constructor.Constructor;
  */
 public class ConfigParamProvider {
 
-  private static final String CONFIGURATION_FILE_PATH = "application.yml";
+  private static final String CONFIGURATION_FILE_PATH = "old-application.yml";
   private static final Map<ConfigParamVar, String> params = new HashMap<>();
 
   static {

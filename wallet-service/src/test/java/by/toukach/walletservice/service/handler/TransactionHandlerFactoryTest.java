@@ -16,7 +16,7 @@ public class TransactionHandlerFactoryTest {
 
   @BeforeEach
   public void setUp() {
-    transactionHandlerFactory = TransactionHandlerFactoryImpl.getInstance();
+//    transactionHandlerFactory = TransactionHandlerFactoryImpl.getInstance();
   }
 
   @Test

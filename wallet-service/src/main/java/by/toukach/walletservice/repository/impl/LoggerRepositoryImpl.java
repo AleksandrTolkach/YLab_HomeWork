@@ -1,8 +1,8 @@
 package by.toukach.walletservice.repository.impl;
 
 import by.toukach.walletservice.entity.Log;
-import by.toukach.walletservice.entity.mapper.RowMapper;
-import by.toukach.walletservice.entity.mapper.impl.LogMapper;
+import by.toukach.walletservice.entity.rowmapper.RowMapper;
+import by.toukach.walletservice.entity.rowmapper.impl.LogRowMapper;
 import by.toukach.walletservice.exception.DbException;
 import by.toukach.walletservice.exception.ExceptionMessage;
 import by.toukach.walletservice.repository.DbInitializer;
@@ -13,22 +13,20 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
 
 /**
  * Класс для выполнения запросов, связанных с логами, в память.
  */
+@Repository
+@RequiredArgsConstructor
 public class LoggerRepositoryImpl implements LoggerRepository {
 
-  private static final LoggerRepository instance = new LoggerRepositoryImpl();
   private static final String ID = "id";
 
   private final DbInitializer dbInitializer;
   private final RowMapper<Log> logRowMapper;
-
-  private LoggerRepositoryImpl() {
-    dbInitializer = DbInitializerImpl.getInstance();
-    logRowMapper = LogMapper.getInstance();
-  }
 
   @Override
   public Log createLog(Log log) {
@@ -39,7 +37,7 @@ public class LoggerRepositoryImpl implements LoggerRepository {
             + "VALUES (?, ?, ?) RETURNING ID")) {
 
       statement.setObject(1, log.getType().name());
-      statement.setObject(2, log.getValue());
+      statement.setObject(2, log.getMessage());
       statement.setObject(3, log.getCreatedAt());
 
       statement.execute();
@@ -89,9 +87,5 @@ public class LoggerRepositoryImpl implements LoggerRepository {
         System.err.println(ExceptionMessage.CLOSE_CONNECTION_TO_DB);
       }
     }
-  }
-
-  public static LoggerRepository getInstance() {
-    return instance;
   }
 }

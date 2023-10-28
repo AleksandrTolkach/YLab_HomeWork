@@ -1,8 +1,8 @@
 package by.toukach.walletservice.repository.impl;
 
 import by.toukach.walletservice.entity.Transaction;
-import by.toukach.walletservice.entity.mapper.RowMapper;
-import by.toukach.walletservice.entity.mapper.impl.TransactionMapper;
+import by.toukach.walletservice.entity.rowmapper.RowMapper;
+import by.toukach.walletservice.entity.rowmapper.impl.TransactionRowMapper;
 import by.toukach.walletservice.exception.DbException;
 import by.toukach.walletservice.exception.ExceptionMessage;
 import by.toukach.walletservice.repository.DbInitializer;
@@ -15,23 +15,21 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
 
 /**
  * Класс для выполнения запросов, связанных с операциями, в память.
  * */
+@Repository
+@RequiredArgsConstructor
 public class TransactionRepositoryImpl implements TransactionRepository {
 
-  private static final TransactionRepository instance = new TransactionRepositoryImpl();
   private static final String ID = "id";
   private static final String USER_ID = "user_id";
 
   private final DbInitializer dbInitializer;
   private final RowMapper<Transaction> transactionRowMapper;
-
-  private TransactionRepositoryImpl() {
-    dbInitializer = DbInitializerImpl.getInstance();
-    transactionRowMapper = TransactionMapper.getInstance();
-  }
 
   @Override
   public Transaction createTransaction(Transaction transaction) {
@@ -110,10 +108,6 @@ public class TransactionRepositoryImpl implements TransactionRepository {
         System.err.println(ExceptionMessage.CLOSE_CONNECTION_TO_DB);
       }
     }
-  }
-
-  public static TransactionRepository getInstance() {
-    return instance;
   }
 
   private List<Transaction> findTransactionsBy(String argumentName, Object argumentValue) {

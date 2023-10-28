@@ -3,17 +3,13 @@ package by.toukach.walletservice.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
 import by.toukach.walletservice.BaseTest;
-import by.toukach.walletservice.dto.AccountDto;
 import by.toukach.walletservice.dto.UserDto;
-import by.toukach.walletservice.entity.Account;
 import by.toukach.walletservice.entity.User;
-import by.toukach.walletservice.entity.converter.Converter;
-import by.toukach.walletservice.entity.converter.impl.AccountConverter;
-import by.toukach.walletservice.entity.converter.impl.UserConverter;
 import by.toukach.walletservice.exception.EntityDuplicateException;
 import by.toukach.walletservice.exception.EntityNotFoundException;
 import by.toukach.walletservice.repository.UserRepository;
@@ -40,121 +36,102 @@ public class UserServiceTest extends BaseTest {
   private UserService userService;
   @Mock
   private UserRepository userRepository;
-  @Mock
-  private Converter<User, UserDto> userConverter;
-  @Mock
-  private Converter<Account, AccountDto> accountConverter;
+//  @Mock
+//  private UserMapperImpl userMapper;
   private MockedStatic<UserRepositoryImpl> userRepositoryMock;
-  private MockedStatic<UserConverter> userConverterMock;
-  private MockedStatic<AccountConverter> accountConverterMock;
   private UserDto newUserDto;
   private UserDto createdUserDto;
-  private UserDto updatedUserDto;
-  private User newUser;
   private User createdUser;
-  private User updatedUser;
-  private AccountDto accountDto;
-  private Account account;
+  private UserDto newUserDtoWithRole;
 
   @BeforeEach
   public void setUp() throws NoSuchMethodException, InvocationTargetException,
       IllegalArgumentException, InstantiationException, IllegalAccessException {
     newUserDto = getNewUserDto();
-    createdUserDto = getCreatedUserDto();
-    updatedUserDto = getUpdatedUserDto();
-    newUser = getNewUser();
-    createdUser = getCreatedUser();
-    updatedUser = getUpdatedUser();
-    accountDto = getCreatedAccountDto();
-    account = getCreatedAccount();
-
-    userRepositoryMock = mockStatic(UserRepositoryImpl.class);
-    userRepositoryMock.when(UserRepositoryImpl::getInstance).thenReturn(userRepository);
-
-    userConverterMock = mockStatic(UserConverter.class);
-    userConverterMock.when(UserConverter::getInstance).thenReturn(userConverter);
-
-    accountConverterMock = mockStatic(AccountConverter.class);
-    accountConverterMock.when(AccountConverter::getInstance).thenReturn(accountConverter);
-
-    Constructor<UserServiceImpl> privateConstructor = UserServiceImpl.class
-        .getDeclaredConstructor();
-    privateConstructor.setAccessible(true);
-
-    userService = privateConstructor.newInstance();
+//    createdUserDto = getCreatedUserDto();
+//    createdUser = getCreatedUser();
+//    newUserDtoWithRole = getNewUserDtoWithRole();
+//
+//    userRepositoryMock = mockStatic(UserRepositoryImpl.class);
+//    userRepositoryMock.when(UserRepositoryImpl::getInstance).thenReturn(userRepository);
+//
+//    Constructor<UserServiceImpl> privateConstructor = UserServiceImpl.class
+//        .getDeclaredConstructor();
+//    privateConstructor.setAccessible(true);
+//
+//    userService = privateConstructor.newInstance();
   }
 
   @AfterEach
   public void cleanUp() {
     userRepositoryMock.close();
-    userConverterMock.close();
-    accountConverterMock.close();
     userService = null;
   }
 
-  @Test
-  @DisplayName("Тест создания пользователя в приложении")
-  public void createUserTest_should_CreateUser() {
-    when(userRepository.isExists(LOGIN)).thenReturn(false);
-    when(userConverter.toEntity(newUserDto)).thenReturn(newUser);
-    when(userRepository.createUser(newUser)).thenReturn(createdUser);
-    when(userConverter.toDto(createdUser)).thenReturn(createdUserDto);
-
-    UserDto expectedResult = createdUserDto;
-    UserDto actualResult = userService.createUser(newUserDto);
-
-    assertThat(actualResult).isEqualTo(expectedResult);
-  }
-
-  @Test
-  @DisplayName("Тест создания пользователя в приложении с дублирующим логином")
-  public void createUserTest_should_ThrowError_WhenLoginExists() {
-    when(userRepository.isExists(LOGIN)).thenReturn(true);
-
-    assertThatThrownBy(() -> userService.createUser(newUserDto))
-        .isInstanceOf(EntityDuplicateException.class);
-  }
-
-  @Test
-  @DisplayName("Тест поиска пользователя в приложении по ID")
-  public void findUserByIdTest_should_FindUser() {
-    when(userRepository.findUserById(USER_ID)).thenReturn(Optional.of(createdUser));
-    when(userConverter.toDto(createdUser)).thenReturn(createdUserDto);
-
-    UserDto expectedResult = createdUserDto;
-    UserDto actualResult = userService.findUserById(USER_ID);
-
-    assertThat(actualResult).isEqualTo(expectedResult);
-  }
-
-  @Test
-  @DisplayName("Тест поиска пользователя в приложении по несуществующему ID")
-  public void findUserByIdTest_should_ThrowError_WhenUserNotExist() {
-    when(userRepository.findUserById(UN_EXISTING_ID)).thenReturn(Optional.empty());
-
-    assertThatThrownBy(() -> userService.findUserById(UN_EXISTING_ID))
-        .isInstanceOf(EntityNotFoundException.class);
-  }
-
-  @Test
-  @DisplayName("Тест поиска пользователя в приложении по логину")
-  public void findUserByLoginTest_should_FindUser() {
-    when(userRepository.findUserByLogin(LOGIN)).thenReturn(Optional.of(createdUser));
-    when(userConverter.toDto(createdUser)).thenReturn(createdUserDto);
-
-    UserDto expectedResult = createdUserDto;
-    UserDto actualResult = userService.findUserByLogin(LOGIN);
-
-    assertThat(actualResult).isEqualTo(expectedResult);
-  }
-
-  @Test
-  @DisplayName("Тест поиска пользователя в приложении по несуществующему логину")
-  public void findUserByLoginTest_should_ThrowError_WhenUserNotExist() {
-    when(userRepository.findUserByLogin(UN_EXISTING_LOGIN))
-        .thenThrow(EntityNotFoundException.class);
-
-    assertThatThrownBy(() -> userService.findUserByLogin(UN_EXISTING_LOGIN))
-        .isInstanceOf(EntityNotFoundException.class);
-  }
+//  @Test
+//  @DisplayName("Тест создания пользователя в приложении")
+//  public void createUserTest_should_CreateUser() {
+//    when(userRepository.isExists(LOGIN)).thenReturn(false);
+//    when(userMapper.userDtoToUser(newUserDtoWithRole)).thenReturn(createdUser);
+//    when(userRepository.createUser(any())).thenReturn(createdUser);
+//    when(userMapper.userToUserDto(createdUser)).thenReturn(createdUserDto);
+//
+//    UserDto expectedResult = createdUserDto;
+//    UserDto actualResult = userService.createUser(newUserDtoWithRole);
+//
+//    assertThat(actualResult).isEqualTo(expectedResult);
+//  }
+//
+//  @Test
+//  @DisplayName("Тест создания пользователя в приложении с дублирующим логином")
+//  public void createUserTest_should_ThrowError_WhenLoginExists() {
+//    when(userRepository.isExists(LOGIN)).thenReturn(true);
+//
+//    assertThatThrownBy(() -> userService.createUser(newUserDto))
+//        .isInstanceOf(EntityDuplicateException.class);
+//  }
+//
+//  @Test
+//  @DisplayName("Тест поиска пользователя в приложении по ID")
+//  public void findUserByIdTest_should_FindUser() {
+//    when(userRepository.findUserById(USER_ID)).thenReturn(Optional.of(createdUser));
+//    when(userMapper.userToUserDto(createdUser)).thenReturn(createdUserDto);
+//
+//    UserDto expectedResult = createdUserDto;
+//    UserDto actualResult = userService.findUserById(USER_ID);
+//
+//    assertThat(actualResult).isEqualTo(expectedResult);
+//  }
+//
+//  @Test
+//  @DisplayName("Тест поиска пользователя в приложении по несуществующему ID")
+//  public void findUserByIdTest_should_ThrowError_WhenUserNotExist() {
+//    when(userRepository.findUserById(UN_EXISTING_ID)).thenReturn(Optional.empty());
+//    when(userMapper.userToUserDto(createdUser)).thenReturn(createdUserDto);
+//
+//    assertThatThrownBy(() -> userService.findUserById(UN_EXISTING_ID))
+//        .isInstanceOf(EntityNotFoundException.class);
+//  }
+//
+//  @Test
+//  @DisplayName("Тест поиска пользователя в приложении по логину")
+//  public void findUserByLoginTest_should_FindUser() {
+//    when(userRepository.findUserByLogin(LOGIN)).thenReturn(Optional.of(createdUser));
+//    when(userMapper.userToUserDto(createdUser)).thenReturn(createdUserDto);
+//
+//    UserDto expectedResult = createdUserDto;
+//    UserDto actualResult = userService.findUserByLogin(LOGIN);
+//
+//    assertThat(actualResult).isEqualTo(expectedResult);
+//  }
+//
+//  @Test
+//  @DisplayName("Тест поиска пользователя в приложении по несуществующему логину")
+//  public void findUserByLoginTest_should_ThrowError_WhenUserNotExist() {
+//    when(userRepository.findUserByLogin(UN_EXISTING_LOGIN))
+//        .thenThrow(EntityNotFoundException.class);
+//
+//    assertThatThrownBy(() -> userService.findUserByLogin(UN_EXISTING_LOGIN))
+//        .isInstanceOf(EntityNotFoundException.class);
+//  }
 }

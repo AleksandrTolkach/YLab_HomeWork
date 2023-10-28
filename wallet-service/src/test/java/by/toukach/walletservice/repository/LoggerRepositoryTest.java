@@ -23,10 +23,10 @@ public class LoggerRepositoryTest extends ContainersEnvironment {
   public void setUp() throws NoSuchFieldException, IllegalAccessException {
     injectTestJdbcUrl();
 
-    migration = MigrationImpl.getInstance();
+//    migration = MigrationImpl.getInstance();
     migration.migrate();
 
-    loggerRepository = LoggerRepositoryImpl.getInstance();
+//    loggerRepository = LoggerRepositoryImpl.getInstance();
     newLog = getNewLog();
     createdLog = getCreatedLog();
 

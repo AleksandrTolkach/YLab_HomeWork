@@ -2,8 +2,7 @@ package by.toukach.walletservice.service.impl;
 
 import by.toukach.walletservice.dto.UserDto;
 import by.toukach.walletservice.entity.User;
-import by.toukach.walletservice.entity.converter.Converter;
-import by.toukach.walletservice.entity.converter.impl.UserConverter;
+import by.toukach.walletservice.entity.mapper.UserMapper;
 import by.toukach.walletservice.exception.EntityDuplicateException;
 import by.toukach.walletservice.exception.EntityNotFoundException;
 import by.toukach.walletservice.exception.ExceptionMessage;
@@ -11,21 +10,18 @@ import by.toukach.walletservice.repository.UserRepository;
 import by.toukach.walletservice.repository.impl.UserRepositoryImpl;
 import by.toukach.walletservice.service.UserService;
 import java.time.LocalDateTime;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 /**
  * Класс для выполнения операция с пользователями.
  */
+@Service
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-  private static final UserService instance = new UserServiceImpl();
-
   private final UserRepository userRepository;
-  private final Converter<User, UserDto> userConverter;
-
-  private UserServiceImpl() {
-    userRepository = UserRepositoryImpl.getInstance();
-    userConverter = UserConverter.getInstance();
-  }
+  private final UserMapper userMapper;
 
   @Override
   public UserDto createUser(UserDto userDto) {
@@ -35,8 +31,8 @@ public class UserServiceImpl implements UserService {
     } else {
       userDto.setCreatedAt(LocalDateTime.now());
 
-      User user = userRepository.createUser(userConverter.toEntity(userDto));
-      return userConverter.toDto(user);
+      User user = userRepository.createUser(userMapper.userDtoToUser(userDto));
+      return userMapper.userToUserDto(user);
     }
   }
 
@@ -45,7 +41,7 @@ public class UserServiceImpl implements UserService {
     User user = userRepository.findUserById(id).orElseThrow(() ->
         new EntityNotFoundException(String.format(ExceptionMessage.USER_BY_ID_NOT_FOUND, id)));
 
-    return userConverter.toDto(user);
+    return userMapper.userToUserDto(user);
   }
 
   @Override
@@ -53,15 +49,11 @@ public class UserServiceImpl implements UserService {
     User user = userRepository.findUserByLogin(login).orElseThrow(() ->
         new EntityNotFoundException(String.format(ExceptionMessage.USER_BY_ID_NOT_FOUND, login)));
 
-    return userConverter.toDto(user);
+    return userMapper.userToUserDto(user);
   }
 
   @Override
   public boolean isExists(Long id) {
     return userRepository.isExists(id);
-  }
-
-  public static UserService getInstance() {
-    return instance;
   }
 }

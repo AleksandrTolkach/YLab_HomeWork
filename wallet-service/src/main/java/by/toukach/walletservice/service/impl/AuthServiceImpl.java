@@ -1,46 +1,61 @@
 package by.toukach.walletservice.service.impl;
 
+import by.toukach.walletservice.aspect.annotation.Loggable;
 import by.toukach.walletservice.dto.LogInDto;
+import by.toukach.walletservice.dto.LogInDtoResponse;
 import by.toukach.walletservice.dto.SignUpDto;
 import by.toukach.walletservice.dto.UserDto;
-import by.toukach.walletservice.entity.Log;
 import by.toukach.walletservice.enumiration.LogType;
+import by.toukach.walletservice.enumiration.UserRole;
 import by.toukach.walletservice.exception.EntityNotFoundException;
 import by.toukach.walletservice.exception.ExceptionMessage;
+import by.toukach.walletservice.security.Authentication;
+import by.toukach.walletservice.security.AuthenticationManager;
+import by.toukach.walletservice.security.impl.AuthenticationManagerImpl;
 import by.toukach.walletservice.service.AuthService;
-import by.toukach.walletservice.service.LoggerService;
 import by.toukach.walletservice.service.UserService;
-import by.toukach.walletservice.utils.LogUtil;
+import by.toukach.walletservice.validator.Validator;
+import by.toukach.walletservice.validator.impl.LogInDtoValidator;
+import by.toukach.walletservice.validator.impl.SignUpDtoValidator;
 import java.util.ArrayList;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Repository;
 
 /**
  * Класс для аутентификации пользователей.
- * */
+ */
+@Repository
+@RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
-  private static final AuthService instance = new AuthServiceImpl();
-
   private final UserService userService;
-  private final LoggerService loggerService;
-
-  private AuthServiceImpl() {
-    userService = UserServiceImpl.getInstance();
-    loggerService = LoggerServiceImpl.getInstance();
-  }
+  private final AuthenticationManager authenticationManager;
+  private final Validator<LogInDto> logInDtoValidator;
+  private final Validator<SignUpDto> signUpDtoValidator;
+  @Value("${app.data}")
+  private String data;
 
   @Override
-  public UserDto logIn(LogInDto logInDto) {
+  @Loggable(type = LogType.LOG_IN)
+  public LogInDtoResponse logIn(LogInDto logInDto) {
+    String data = this.data;
+    logInDtoValidator.validate(logInDto);
+
     try {
       UserDto userDto = userService.findUserByLogin(logInDto.getLogin());
 
-      if (!userDto.getPassword().equals(logInDto.getPassword())) {
+      Authentication authentication = authenticationManager.authenticate(logInDto.getLogin(),
+          logInDto.getPassword());
+
+      if (!authentication.isAuthenticated()) {
         throw new EntityNotFoundException();
       } else {
 
-        Log log = LogUtil.prepareLog(LogType.AUTH, String.format(LogUtil.LOGIN, userDto.getId()));
-        loggerService.createLog(log);
-
-        return userDto;
+        return LogInDtoResponse.builder()
+            .authentication(authentication)
+            .userDto(userDto)
+            .build();
       }
     } catch (EntityNotFoundException e) {
       throw new EntityNotFoundException(ExceptionMessage.WRONG_LOGIN_OR_PASSWORD);
@@ -48,22 +63,37 @@ public class AuthServiceImpl implements AuthService {
   }
 
   @Override
-  public UserDto signUp(SignUpDto signUpDto) {
+  @Loggable(type = LogType.SIGN_UP)
+  public LogInDtoResponse signUp(SignUpDto signUpDto) {
+    signUpDtoValidator.validate(signUpDto);
+
+    String login = signUpDto.getLogin();
+    String password = signUpDto.getPassword();
+
     UserDto userDto = UserDto.builder()
-        .login(signUpDto.getLogin())
-        .password(signUpDto.getPassword())
+        .login(login)
+        .password(password)
+        .role(UserRole.USER)
         .accountList(new ArrayList<>())
         .build();
 
     userDto = userService.createUser(userDto);
 
-    Log log = LogUtil.prepareLog(LogType.AUTH, String.format(LogUtil.SIGN_UP, userDto.getId()));
-    loggerService.createLog(log);
+    Authentication authentication = authenticationManager.authenticate(login, password);
 
-    return userDto;
+    return LogInDtoResponse.builder()
+        .authentication(authentication)
+        .userDto(userDto)
+        .build();
   }
 
-  public static AuthService getInstance() {
-    return instance;
+  @Override
+  @Loggable(type = LogType.LOG_OUT)
+  public LogInDtoResponse logOut(String login) {
+    UserDto userDto = userService.findUserByLogin(login);
+    authenticationManager.clearAuthentication(login);
+    return LogInDtoResponse.builder()
+        .userDto(userDto)
+        .build();
   }
 }

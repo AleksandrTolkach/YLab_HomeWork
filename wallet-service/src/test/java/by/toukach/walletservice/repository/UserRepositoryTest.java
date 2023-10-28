@@ -1,12 +1,10 @@
 package by.toukach.walletservice.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import by.toukach.walletservice.ContainersEnvironment;
 import by.toukach.walletservice.PostgresTestContainer;
 import by.toukach.walletservice.entity.User;
-import by.toukach.walletservice.exception.EntityNotFoundException;
 import by.toukach.walletservice.repository.impl.MigrationImpl;
 import by.toukach.walletservice.repository.impl.UserRepositoryImpl;
 import java.util.Optional;
@@ -32,12 +30,12 @@ public class UserRepositoryTest extends ContainersEnvironment {
   public void setUp() throws NoSuchFieldException, IllegalAccessException {
     injectTestJdbcUrl();
 
-    migration = MigrationImpl.getInstance();
+//    migration = MigrationImpl.getInstance();
     migration.migrate();
 
-    userRepository = UserRepositoryImpl.getInstance();
+//    userRepository = UserRepositoryImpl.getInstance();
     admin = getAdmin();
-    newUser = getNewUser();
+    newUser = getNewUserWithRole();
     createdUser = getCreatedUser();
   }
 

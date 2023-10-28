@@ -2,8 +2,7 @@ package by.toukach.walletservice.service.impl;
 
 import by.toukach.walletservice.dto.TransactionDto;
 import by.toukach.walletservice.entity.Transaction;
-import by.toukach.walletservice.entity.converter.Converter;
-import by.toukach.walletservice.entity.converter.impl.TransactionConverter;
+import by.toukach.walletservice.entity.mapper.TransactionMapper;
 import by.toukach.walletservice.exception.EntityNotFoundException;
 import by.toukach.walletservice.exception.ExceptionMessage;
 import by.toukach.walletservice.repository.TransactionRepository;
@@ -12,30 +11,28 @@ import by.toukach.walletservice.service.TransactionService;
 import by.toukach.walletservice.service.UserService;
 import java.time.LocalDateTime;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 /**
  * Класс для выполнения операций с Transaction.
  */
+@Service
+@RequiredArgsConstructor
 public class TransactionServiceImpl implements TransactionService {
 
-  private static final TransactionService instance = new TransactionServiceImpl();
-
   private final TransactionRepository transactionRepository;
-  private final Converter<Transaction, TransactionDto> transactionConverter;
   private final UserService userService;
-
-  private TransactionServiceImpl() {
-    transactionRepository = TransactionRepositoryImpl.getInstance();
-    transactionConverter = TransactionConverter.getInstance();
-    userService = UserServiceImpl.getInstance();
-  }
+  private final TransactionMapper transactionMapper;
 
   @Override
   public TransactionDto createTransaction(TransactionDto transactionDto) {
     transactionDto.setCreatedAt(LocalDateTime.now());
 
-    transactionRepository.createTransaction(transactionConverter.toEntity(transactionDto));
-    return transactionDto;
+    Transaction transaction = transactionRepository.createTransaction(transactionMapper
+        .transactionDtoToTransaction(transactionDto));
+
+    return transactionMapper.transactionToTransactionDto(transaction);
   }
 
   @Override
@@ -43,7 +40,7 @@ public class TransactionServiceImpl implements TransactionService {
     Transaction transaction = transactionRepository.findTransactionById(id).orElseThrow(() ->
         new EntityNotFoundException(String.format(ExceptionMessage.TRANSACTION_NOT_FOUND, id)));
 
-    return transactionConverter.toDto(transaction);
+    return transactionMapper.transactionToTransactionDto(transaction);
   }
 
   @Override
@@ -54,12 +51,8 @@ public class TransactionServiceImpl implements TransactionService {
     } else {
       return transactionRepository.findTransactionByUserId(userId)
           .stream()
-          .map(transactionConverter::toDto)
+          .map(transactionMapper::transactionToTransactionDto)
           .toList();
     }
-  }
-
-  public static TransactionService getInstance() {
-    return instance;
   }
 }
