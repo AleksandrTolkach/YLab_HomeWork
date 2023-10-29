@@ -13,4 +13,9 @@ public interface DbInitializer {
    * @return настроенный Connection.
    */
   Connection getConnection();
+
+  /**
+   * Метод для создания БД и схем.
+   */
+  void prepareDb();
 }

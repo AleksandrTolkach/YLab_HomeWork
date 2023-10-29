@@ -1,36 +1,53 @@
 package by.toukach.walletservice.repository.impl;
 
+import by.toukach.walletservice.config.PropertyConfig;
 import by.toukach.walletservice.exception.DbException;
 import by.toukach.walletservice.exception.ExceptionMessage;
 import by.toukach.walletservice.repository.DbInitializer;
-import by.toukach.walletservice.utils.param.ConfigParamProvider;
-import by.toukach.walletservice.utils.param.ConfigParamProvider.ConfigParamVar;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
 /**
  * Класс для настройки соединений к базе и предоставляющий Connection.
  */
+@Component
+@RequiredArgsConstructor
 public class DbInitializerImpl implements DbInitializer {
 
-  private static DbInitializer instance = new DbInitializerImpl();
+  private final PropertyConfig propertyConfig;
 
-  private DbInitializerImpl() {
+  @Override
+  public Connection getConnection() {
     try {
-      Class.forName(ConfigParamProvider.getParam(ConfigParamVar.DB_DRIVER));
+      return DriverManager.getConnection(propertyConfig.getDataBaseUrl()
+              + propertyConfig.getDataBaseName(), propertyConfig.getDataBaseUsername(),
+          propertyConfig.getDataBasePassword());
+    } catch (SQLException e) {
+      throw new DbException(ExceptionMessage.CONNECT_TO_DB, e);
+    }
+  }
+
+  @Override
+  public void prepareDb() {
+    String dataBaseDriver = propertyConfig.getDataBaseDriver();
+
+    try {
+      Class.forName(dataBaseDriver);
     } catch (ClassNotFoundException e) {
       throw new DbException(ExceptionMessage.DB_DRIVER_DID_NOT_LOAD, e);
     }
 
-    String url = ConfigParamProvider.getParam(ConfigParamVar.DB_URL);
-    String dbName = ConfigParamProvider.getParam(ConfigParamVar.DB_NAME);
-    String username = ConfigParamProvider.getParam(ConfigParamVar.DB_USERNAME);
-    String password = ConfigParamProvider.getParam(ConfigParamVar.DB_PASSWORD);
+    String url = propertyConfig.getDataBaseUrl();
+    String dataBaseName = propertyConfig.getDataBaseName();
+    String username = propertyConfig.getDataBaseUsername();
+    String password = propertyConfig.getDataBasePassword();
 
     try (Connection connection =
-        DriverManager.getConnection(String.format(url, username), username, password);
+        DriverManager.getConnection(url + username, username, password);
         Statement statement = connection.createStatement()) {
 
       statement.executeUpdate("CREATE DATABASE wallet");
@@ -40,30 +57,12 @@ public class DbInitializerImpl implements DbInitializer {
     }
 
     try (Connection connection =
-        DriverManager.getConnection(String.format(url, dbName), username, password);
+        DriverManager.getConnection(url + dataBaseName, username, password);
         Statement statement = connection.createStatement()) {
       statement.executeUpdate("CREATE SCHEMA application AUTHORIZATION toukach");
       statement.executeUpdate("CREATE SCHEMA liquibase AUTHORIZATION toukach");
     } catch (SQLException e) {
       System.err.println(ExceptionMessage.SCHEMES_EXISTS);
     }
-  }
-
-  @Override
-  public Connection getConnection() {
-    String url = ConfigParamProvider.getParam(ConfigParamVar.DB_URL);
-    String dbName = ConfigParamProvider.getParam(ConfigParamVar.DB_NAME);
-    String username = ConfigParamProvider.getParam(ConfigParamVar.DB_USERNAME);
-    String password = ConfigParamProvider.getParam(ConfigParamVar.DB_PASSWORD);
-
-    try {
-      return DriverManager.getConnection(String.format(url, dbName), username, password);
-    } catch (SQLException e) {
-      throw new DbException(ExceptionMessage.CONNECT_TO_DB, e);
-    }
-  }
-
-  public static DbInitializer getInstance() {
-    return instance;
   }
 }

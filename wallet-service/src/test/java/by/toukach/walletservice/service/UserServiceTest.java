@@ -4,42 +4,41 @@ package by.toukach.walletservice.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
 import by.toukach.walletservice.BaseTest;
 import by.toukach.walletservice.dto.UserDto;
 import by.toukach.walletservice.entity.User;
-import by.toukach.walletservice.entity.mapper.UserMapperImpl;
+import by.toukach.walletservice.entity.mapper.UserMapper;
 import by.toukach.walletservice.exception.EntityDuplicateException;
 import by.toukach.walletservice.exception.EntityNotFoundException;
 import by.toukach.walletservice.repository.UserRepository;
-import by.toukach.walletservice.repository.impl.UserRepositoryImpl;
 import by.toukach.walletservice.service.impl.UserServiceImpl;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Optional;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 public class UserServiceTest extends BaseTest {
 
-  private UserService userService;
+  @InjectMocks
+  private UserServiceImpl userService;
   @Mock
   private UserRepository userRepository;
   @Mock
-  private UserMapperImpl userMapper;
-  private MockedStatic<UserRepositoryImpl> userRepositoryMock;
+  private UserMapper userMapper;
+  @Mock
+  private PasswordEncoder passwordEncoder;
   private UserDto newUserDto;
   private UserDto createdUserDto;
   private User createdUser;
@@ -52,21 +51,6 @@ public class UserServiceTest extends BaseTest {
     createdUserDto = getCreatedUserDto();
     createdUser = getCreatedUser();
     newUserDtoWithRole = getNewUserDtoWithRole();
-
-    userRepositoryMock = mockStatic(UserRepositoryImpl.class);
-    userRepositoryMock.when(UserRepositoryImpl::getInstance).thenReturn(userRepository);
-
-    Constructor<UserServiceImpl> privateConstructor = UserServiceImpl.class
-        .getDeclaredConstructor();
-    privateConstructor.setAccessible(true);
-
-    userService = privateConstructor.newInstance();
-  }
-
-  @AfterEach
-  public void cleanUp() {
-    userRepositoryMock.close();
-    userService = null;
   }
 
   @Test
@@ -74,6 +58,7 @@ public class UserServiceTest extends BaseTest {
   public void createUserTest_should_CreateUser() {
     when(userRepository.isExists(LOGIN)).thenReturn(false);
     when(userMapper.userDtoToUser(newUserDtoWithRole)).thenReturn(createdUser);
+    when(passwordEncoder.encode(PASSWORD)).thenReturn(PASSWORD);
     when(userRepository.createUser(any())).thenReturn(createdUser);
     when(userMapper.userToUserDto(createdUser)).thenReturn(createdUserDto);
 

@@ -2,7 +2,6 @@ package by.toukach.walletservice.repository.impl;
 
 import by.toukach.walletservice.entity.Log;
 import by.toukach.walletservice.entity.rowmapper.RowMapper;
-import by.toukach.walletservice.entity.rowmapper.impl.LogRowMapper;
 import by.toukach.walletservice.exception.DbException;
 import by.toukach.walletservice.exception.ExceptionMessage;
 import by.toukach.walletservice.repository.DbInitializer;
@@ -13,22 +12,20 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
 
 /**
  * Класс для выполнения запросов, связанных с логами, в память.
  */
+@Repository
+@RequiredArgsConstructor
 public class LoggerRepositoryImpl implements LoggerRepository {
 
-  private static final LoggerRepository instance = new LoggerRepositoryImpl();
   private static final String ID = "id";
 
   private final DbInitializer dbInitializer;
   private final RowMapper<Log> logRowMapper;
-
-  private LoggerRepositoryImpl() {
-    dbInitializer = DbInitializerImpl.getInstance();
-    logRowMapper = LogRowMapper.getInstance();
-  }
 
   @Override
   public Log createLog(Log log) {
@@ -89,9 +86,5 @@ public class LoggerRepositoryImpl implements LoggerRepository {
         System.err.println(ExceptionMessage.CLOSE_CONNECTION_TO_DB);
       }
     }
-  }
-
-  public static LoggerRepository getInstance() {
-    return instance;
   }
 }

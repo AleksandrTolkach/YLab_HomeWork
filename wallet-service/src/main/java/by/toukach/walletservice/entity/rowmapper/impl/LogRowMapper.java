@@ -6,16 +6,14 @@ import by.toukach.walletservice.enumiration.LogType;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
+import org.springframework.stereotype.Component;
 
 /**
  * Класс для создания Log из ResultSet.
  * */
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@Component
 public class LogRowMapper implements RowMapper<Log> {
 
-  private static final RowMapper<Log> instance = new LogRowMapper();
   private static final String ID = "id";
   private static final String TYPE = "type";
   private static final String VALUE = "value";
@@ -29,9 +27,5 @@ public class LogRowMapper implements RowMapper<Log> {
         .message(resultSet.getString(VALUE))
         .createdAt(resultSet.getObject(CREATED_AT, LocalDateTime.class))
         .build();
-  }
-
-  public static RowMapper<Log> getInstance() {
-    return instance;
   }
 }

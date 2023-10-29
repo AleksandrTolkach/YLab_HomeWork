@@ -8,7 +8,7 @@ import org.mapstruct.factory.Mappers;
 /**
  * Интерфейс для преобразования Account в AccountDto и обратно.
  */
-@Mapper
+@Mapper(componentModel = "spring")
 public interface AccountMapper {
 
   AccountMapper instance = Mappers.getMapper(AccountMapper.class);

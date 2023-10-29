@@ -6,28 +6,23 @@ import by.toukach.walletservice.entity.mapper.TransactionMapper;
 import by.toukach.walletservice.exception.EntityNotFoundException;
 import by.toukach.walletservice.exception.ExceptionMessage;
 import by.toukach.walletservice.repository.TransactionRepository;
-import by.toukach.walletservice.repository.impl.TransactionRepositoryImpl;
 import by.toukach.walletservice.service.TransactionService;
 import by.toukach.walletservice.service.UserService;
 import java.time.LocalDateTime;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 /**
  * Класс для выполнения операций с Transaction.
  */
+@Service
+@RequiredArgsConstructor
 public class TransactionServiceImpl implements TransactionService {
-
-  private static final TransactionService instance = new TransactionServiceImpl();
 
   private final TransactionRepository transactionRepository;
   private final UserService userService;
   private final TransactionMapper transactionMapper;
-
-  private TransactionServiceImpl() {
-    transactionRepository = TransactionRepositoryImpl.getInstance();
-    userService = UserServiceImpl.getInstance();
-    transactionMapper = TransactionMapper.instance;
-  }
 
   @Override
   public TransactionDto createTransaction(TransactionDto transactionDto) {
@@ -58,9 +53,5 @@ public class TransactionServiceImpl implements TransactionService {
           .map(transactionMapper::transactionToTransactionDto)
           .toList();
     }
-  }
-
-  public static TransactionService getInstance() {
-    return instance;
   }
 }

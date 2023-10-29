@@ -2,12 +2,11 @@ package by.toukach.walletservice.aspect;
 
 import by.toukach.walletservice.aspect.annotation.Loggable;
 import by.toukach.walletservice.dto.AccountDto;
-import by.toukach.walletservice.dto.LogInDtoResponse;
+import by.toukach.walletservice.dto.LogDto;
+import by.toukach.walletservice.dto.LogInResponseDto;
 import by.toukach.walletservice.dto.TransactionDto;
-import by.toukach.walletservice.entity.Log;
 import by.toukach.walletservice.enumiration.LogType;
 import by.toukach.walletservice.service.LoggerService;
-import by.toukach.walletservice.service.impl.LoggerServiceImpl;
 import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -15,6 +14,7 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Аспект для выполнения логирования методов, которые помечены аннотацией @Loggable.
@@ -22,7 +22,12 @@ import org.aspectj.lang.reflect.MethodSignature;
 @Aspect
 public class LoggableAspect {
 
-  private LoggerService loggerService = LoggerServiceImpl.getInstance();
+  private LoggerService loggerService;
+
+  @Autowired
+  public void setLoggerService(LoggerService loggerService) {
+    this.loggerService = loggerService;
+  }
 
   @Pointcut("@annotation(by.toukach.walletservice.aspect.annotation.Loggable)")
   public void annotatedByLoggable() {
@@ -37,6 +42,9 @@ public class LoggableAspect {
    */
   @Around("annotatedByLoggable()")
   public Object logging(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
+    if (loggerService == null) {
+      return proceedingJoinPoint.proceed();
+    }
     MethodSignature signature = (MethodSignature) proceedingJoinPoint.getSignature();
     Method method = signature.getMethod();
     Loggable annotation = method.getAnnotation(Loggable.class);
@@ -68,37 +76,68 @@ public class LoggableAspect {
     }
   }
 
+  /**
+   * Метод для создания лога о транзакции.
+   *
+   * @param logType тип лога.
+   * @param proceedingJoinPoint точка привязки.
+   * @return залогированная транзакция.
+   * @throws Throwable исключение при работе с аспектом.
+   */
   private TransactionDto createTransactionLog(LogType logType,
       ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
     TransactionDto transactionDto = (TransactionDto) proceedingJoinPoint.proceed();
-    Log log = createLog(logType, String.valueOf(transactionDto.getUserId()),
+    LogDto logDto = createLog(logType, String.valueOf(transactionDto.getUserId()),
         String.valueOf(transactionDto.getAccountId()),
         String.valueOf(transactionDto.getValue()));
-    loggerService.createLog(log);
+    loggerService.createLog(logDto);
     return transactionDto;
   }
 
-  private LogInDtoResponse createAuthLog(LogType logType, ProceedingJoinPoint proceedingJoinPoint)
+  /**
+   * Метод для создания лога об авторизации.
+   *
+   * @param logType тип лога.
+   * @param proceedingJoinPoint точка привязки.
+   * @return данные об авторизованном пользователе.
+   * @throws Throwable исключение при работе с аспектом.
+   */
+  private LogInResponseDto createAuthLog(LogType logType, ProceedingJoinPoint proceedingJoinPoint)
       throws Throwable {
-    LogInDtoResponse logInDtoResponse = (LogInDtoResponse) proceedingJoinPoint.proceed();
-    Log log = createLog(logType, logInDtoResponse.getUserDto().getLogin());
-    loggerService.createLog(log);
-    return logInDtoResponse;
+    LogInResponseDto logInResponseDto = (LogInResponseDto) proceedingJoinPoint.proceed();
+    LogDto logDto = createLog(logType, logInResponseDto.getUserDto().getLogin());
+    loggerService.createLog(logDto);
+    return logInResponseDto;
   }
 
+  /**
+   * Метод для создания лога о выполнении действии со счетом.
+   *
+   * @param logType тип лога.
+   * @param proceedingJoinPoint точка привязки.
+   * @return данные об счете.
+   * @throws Throwable исключение при работе с аспектом.
+   */
   private AccountDto createAccountLog(LogType logType, ProceedingJoinPoint proceedingJoinPoint)
       throws Throwable {
     AccountDto accountDto = (AccountDto) proceedingJoinPoint.proceed();
-    Log log = createLog(logType, String.valueOf(accountDto.getUserId()),
+    LogDto logDto = createLog(logType, String.valueOf(accountDto.getUserId()),
         String.valueOf(accountDto.getId()));
-    loggerService.createLog(log);
+    loggerService.createLog(logDto);
     return accountDto;
   }
 
-  private Log createLog(LogType type, String... arg) {
+  /**
+   * Метод для создания объекта лога.
+   *
+   * @param type тип лога.
+   * @param arg информация о логе.
+   * @return подготовленный объект лога.
+   */
+  private LogDto createLog(LogType type, String... arg) {
     String logMessage = String.format(type.getMessage(), arg);
 
-    return Log.builder()
+    return LogDto.builder()
         .type(type)
         .message(logMessage)
         .createdAt(LocalDateTime.now())

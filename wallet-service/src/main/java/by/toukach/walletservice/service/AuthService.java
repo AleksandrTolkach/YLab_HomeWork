@@ -1,7 +1,7 @@
 package by.toukach.walletservice.service;
 
 import by.toukach.walletservice.dto.LogInDto;
-import by.toukach.walletservice.dto.LogInDtoResponse;
+import by.toukach.walletservice.dto.LogInResponseDto;
 import by.toukach.walletservice.dto.SignUpDto;
 
 /**
@@ -15,7 +15,7 @@ public interface AuthService {
    * @param logInDto данные пользователя.
    * @return вошедший пользователь и объект аутентификации.
    */
-  LogInDtoResponse logIn(LogInDto logInDto);
+  LogInResponseDto logIn(LogInDto logInDto);
 
   /**
    * Метод для регистрации пользователя в приложении.
@@ -23,14 +23,13 @@ public interface AuthService {
    * @param signUpDto данные пользователя.
    * @return зарегистрированный пользователь и объект аутентификации.
    */
-  LogInDtoResponse signUp(SignUpDto signUpDto);
+  LogInResponseDto signUp(SignUpDto signUpDto);
 
 
   /**
    * Метор для регистрации выхода польователя из приложения.
    *
-   * @param login логин пользователя.
    * @return вышедший пользователь и объект аутентификации.
    */
-  LogInDtoResponse logOut(String login);
+  LogInResponseDto logOut();
 }

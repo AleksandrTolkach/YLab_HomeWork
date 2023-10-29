@@ -8,7 +8,7 @@ import org.mapstruct.factory.Mappers;
 /**
  * Интерфейс для преобразования User в UserDto и обратно.
  */
-@Mapper
+@Mapper(componentModel = "spring")
 public interface UserMapper {
 
   UserMapper instance = Mappers.getMapper(UserMapper.class);

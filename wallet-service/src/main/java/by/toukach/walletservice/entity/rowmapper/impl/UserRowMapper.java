@@ -9,13 +9,16 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
 /**
  * Класс для создания User из ResultSet.
  * */
+@Component
+@RequiredArgsConstructor
 public class UserRowMapper implements RowMapper<User> {
 
-  private static final RowMapper<User> instance = new UserRowMapper();
   private static final String ID = "id";
   private static final String CREATED_AT = "created_at";
   private static final String LOGIN = "login";
@@ -23,10 +26,6 @@ public class UserRowMapper implements RowMapper<User> {
   private static final String ROLE = "role";
 
   private final RowMapper<Account> accountRowMapper;
-
-  private UserRowMapper() {
-    accountRowMapper = AccountRowMapper.getInstance();
-  }
 
   @Override
   public User mapRow(ResultSet resultSet) throws SQLException {
@@ -52,9 +51,5 @@ public class UserRowMapper implements RowMapper<User> {
     }
 
     return user;
-  }
-
-  public static RowMapper<User> getInstance() {
-    return instance;
   }
 }

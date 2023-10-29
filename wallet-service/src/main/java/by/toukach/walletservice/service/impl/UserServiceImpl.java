@@ -7,24 +7,22 @@ import by.toukach.walletservice.exception.EntityDuplicateException;
 import by.toukach.walletservice.exception.EntityNotFoundException;
 import by.toukach.walletservice.exception.ExceptionMessage;
 import by.toukach.walletservice.repository.UserRepository;
-import by.toukach.walletservice.repository.impl.UserRepositoryImpl;
 import by.toukach.walletservice.service.UserService;
 import java.time.LocalDateTime;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 
 /**
  * Класс для выполнения операция с пользователями.
  */
+@Service
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
-
-  private static final UserService instance = new UserServiceImpl();
 
   private final UserRepository userRepository;
   private final UserMapper userMapper;
-
-  private UserServiceImpl() {
-    userRepository = UserRepositoryImpl.getInstance();
-    userMapper = UserMapper.instance;
-  }
+  private final PasswordEncoder passwordEncoder;
 
   @Override
   public UserDto createUser(UserDto userDto) {
@@ -33,6 +31,7 @@ public class UserServiceImpl implements UserService {
           userDto.getLogin()));
     } else {
       userDto.setCreatedAt(LocalDateTime.now());
+      userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
 
       User user = userRepository.createUser(userMapper.userDtoToUser(userDto));
       return userMapper.userToUserDto(user);
@@ -49,8 +48,9 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public UserDto findUserByLogin(String login) {
-    User user = userRepository.findUserByLogin(login).orElseThrow(() ->
-        new EntityNotFoundException(String.format(ExceptionMessage.USER_BY_ID_NOT_FOUND, login)));
+    User user = userRepository.findUserByLogin(login).orElseThrow(
+        () -> new EntityNotFoundException(String.format(ExceptionMessage.USER_BY_LOGIN_NOT_FOUND,
+            login)));
 
     return userMapper.userToUserDto(user);
   }
@@ -58,9 +58,5 @@ public class UserServiceImpl implements UserService {
   @Override
   public boolean isExists(Long id) {
     return userRepository.isExists(id);
-  }
-
-  public static UserService getInstance() {
-    return instance;
   }
 }

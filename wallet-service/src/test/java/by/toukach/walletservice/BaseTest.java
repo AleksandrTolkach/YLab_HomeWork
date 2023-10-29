@@ -1,11 +1,14 @@
 package by.toukach.walletservice;
 
 import by.toukach.walletservice.dto.AccountDto;
+import by.toukach.walletservice.dto.LogDto;
 import by.toukach.walletservice.dto.LogInDto;
-import by.toukach.walletservice.dto.LogInDtoResponse;
+import by.toukach.walletservice.dto.LogInResponseDto;
 import by.toukach.walletservice.dto.SignUpDto;
 import by.toukach.walletservice.dto.TransactionDto;
 import by.toukach.walletservice.dto.UserDto;
+import by.toukach.walletservice.dto.serializer.LocalDateTimeCustomDeserializer;
+import by.toukach.walletservice.dto.serializer.LocalDateTimeCustomSerializer;
 import by.toukach.walletservice.entity.Account;
 import by.toukach.walletservice.entity.Log;
 import by.toukach.walletservice.entity.Transaction;
@@ -14,11 +17,24 @@ import by.toukach.walletservice.enumiration.LogType;
 import by.toukach.walletservice.enumiration.TransactionType;
 import by.toukach.walletservice.enumiration.UserRole;
 import by.toukach.walletservice.exception.ExceptionMessage;
-import by.toukach.walletservice.security.Authentication;
+import by.toukach.walletservice.security.UserDetailsImpl;
+import by.toukach.walletservice.utils.CookieUtil;
+import by.toukach.walletservice.utils.JwtUtil;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.file.Files;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 
 public class BaseTest {
 
@@ -30,7 +46,8 @@ public class BaseTest {
   protected static final String INCORRECT_PASSWORD = "incorrectPassword";
   protected static final long ADMIN_ID = 1L;
   protected static final String ADMIN_LOGIN = "admin";
-  protected static final String ADMIN_PASSWORD = "admin";
+  protected static final String ADMIN_PASSWORD
+      = "$2a$10$6zpiUWPhVuv0h/G6JVgLM.NM.sAC.BpcQwTo6hy4Xc6kniYPZWeO2";
   protected static final long UN_EXISTING_ID = 99L;
   protected static final String UN_EXISTING_LOGIN = "unExistingLogin";
   protected static final long ACCOUNT_ID = 1L;
@@ -55,7 +72,48 @@ public class BaseTest {
       String.format(ExceptionMessage.PARAMS_NOT_PROVIDED, ID_PARAM + "/" + USER_ID_PARAM);
   protected static final String ID_LOGIN_NOT_PROVIDED =
       String.format(ExceptionMessage.PARAMS_NOT_PROVIDED, ID_PARAM + "/" + LOGIN_PARAM);
+  protected static final String ACCOUNT_URL = "/account";
+  protected static final String ID_URL = "/id";
+  protected static final String ACCOUNT_ID_URL = ACCOUNT_URL + ID_URL + "/%s";
+  protected static final String USER_URL = "/user";
+  protected static final String ACCOUNT_USER_URL = ACCOUNT_URL + USER_URL;
+  protected static final String CREATE_ACCOUNT_FILE_PATH = "json/createAccount.txt";
+  protected static final String LOG_IN_FILE_PATH = "json/logIn.txt";
+  protected static final String SIGN_UP_FILE_PATH = "json/signUp.txt";
+  protected static final String CREDIT_TRANSACTION_FILE_PATH = "json/creditTransaction.txt";
+  protected static final String ADMIN_URL = "/admin";
+  protected static final String LOGS_URL = "/logs";
+  protected static final String ADMIN_LOGS_URL = ADMIN_URL + LOGS_URL;
+  protected static final String AUTH_URL = "/auth";
+  protected static final String LOG_IN_URL = "/login";
+  protected static final String SIGN_UP_URL = "/sign-up";
+  protected static final String AUTH_LOG_IN_URL = AUTH_URL + LOG_IN_URL;
+  protected static final String AUTH_SING_UP_URL = AUTH_URL + SIGN_UP_URL;
+  protected static final String TRANSACTION_URL = "/transaction";
+  protected static final String TRANSACTION_USER = TRANSACTION_URL + USER_URL;
+  private static final ObjectMapper objectMapper = new ObjectMapper();
 
+  static {
+    SimpleModule serializeModule = new SimpleModule();
+    serializeModule.addSerializer(LocalDateTime.class, new LocalDateTimeCustomSerializer());
+    SimpleModule deSerializeModule = new SimpleModule();
+    deSerializeModule.addDeserializer(LocalDateTime.class, new LocalDateTimeCustomDeserializer());
+
+    objectMapper.findAndRegisterModules();
+    objectMapper.registerModule(serializeModule);
+    objectMapper.configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_USING_DEFAULT_VALUE,
+        true);
+  }
+
+  protected <T> T readValue(String value, TypeReference<T> type) throws Exception {
+    return objectMapper.readValue(value, type);
+  }
+
+  protected String readJsonFile(String path) throws IOException {
+    final File createRecipeFile = new ClassPathResource(path)
+        .getFile();
+    return Files.readString(createRecipeFile.toPath());
+  }
 
   protected User getNewUser() {
     return User.builder()
@@ -176,14 +234,28 @@ public class BaseTest {
     return Log.builder()
         .type(LogType.DEBIT)
         .message(LOG_VALUE)
-        .createdAt(CREATED_AT)
         .build();
   }
 
   protected Log getCreatedLog() {
     Log log = getNewLog();
     log.setId(LOG_ID);
+    log.setCreatedAt(CREATED_AT);
     return log;
+  }
+
+  protected LogDto getNewLogDto() {
+    return LogDto.builder()
+        .type(LogType.DEBIT)
+        .message(LOG_VALUE)
+        .build();
+  }
+
+  protected LogDto getCreatedLogDto() {
+    LogDto logDto = getNewLogDto();
+    logDto.setId(LOG_ID);
+    logDto.setCreatedAt(CREATED_AT);
+    return logDto;
   }
 
   protected LogInDto getLogIn() {
@@ -193,28 +265,11 @@ public class BaseTest {
         .build();
   }
 
-  protected LogInDtoResponse getLogInDtoResponse() {
-    return LogInDtoResponse.builder()
-        .authentication(getSuccessfulAuthentication())
+  protected LogInResponseDto getLogInDtoResponse() {
+    String token = JwtUtil.generateTokenFromUsername(LOGIN);
+    return LogInResponseDto.builder()
+        .accessTokenCookieString(CookieUtil.generateAccessCookie(token).toString())
         .userDto(getCreatedUserDto())
-        .build();
-  }
-
-  protected Authentication getSuccessfulAuthentication() {
-    return Authentication.builder()
-        .login(LOGIN)
-        .token(TOKEN)
-        .authority(UserRole.USER)
-        .authenticated(true)
-        .build();
-  }
-
-  protected Authentication getUnSuccessfulAuthentication() {
-    return Authentication.builder()
-        .login(LOGIN)
-        .token(TOKEN)
-        .authority(UserRole.USER)
-        .authenticated(false)
         .build();
   }
 
@@ -222,6 +277,15 @@ public class BaseTest {
     return SignUpDto.builder()
         .login(LOGIN)
         .password(PASSWORD)
+        .build();
+  }
+
+  protected TransactionDto getNewCreditTransactionDto() {
+    return TransactionDto.builder()
+        .type(TransactionType.CREDIT)
+        .userId(USER_ID)
+        .accountId(ACCOUNT_ID)
+        .value(TRANSACTION_VALUE)
         .build();
   }
 
@@ -251,5 +315,13 @@ public class BaseTest {
         .accountId(ACCOUNT_ID)
         .value(TRANSACTION_VALUE)
         .build();
+  }
+
+  protected Authentication getAuthentication() {
+    return new UsernamePasswordAuthenticationToken(LOGIN, PASSWORD);
+  }
+
+  protected UserDetails getUserDetails() {
+    return new UserDetailsImpl(getCreatedUser());
   }
 }

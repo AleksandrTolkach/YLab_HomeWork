@@ -5,17 +5,15 @@ import by.toukach.walletservice.exception.ValidationError;
 import by.toukach.walletservice.exception.ValidationExceptionList;
 import by.toukach.walletservice.validator.ValidationMessages;
 import by.toukach.walletservice.validator.Validator;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
 
 /**
  * Класс для валидации LogInDto.
  */
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@Component
 public class LogInDtoValidator implements Validator<LogInDto> {
 
-  private static final Validator<LogInDto> instance = new LogInDtoValidator();
   private static final String LOGIN = "login";
   private static final String PASSWORD = "password";
 
@@ -43,10 +41,6 @@ public class LogInDtoValidator implements Validator<LogInDto> {
     if (!validationExceptionList.isEmpty()) {
       throw validationExceptionList;
     }
-  }
-
-  public static Validator<LogInDto> getInstance() {
-    return instance;
   }
 
   private void addLoginError(ValidationExceptionList validationExceptionList) {

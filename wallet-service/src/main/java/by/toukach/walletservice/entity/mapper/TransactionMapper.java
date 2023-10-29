@@ -8,7 +8,7 @@ import org.mapstruct.factory.Mappers;
 /**
  * Интерфейс для преобразования Transaction в TransactionDto и обратно.
  */
-@Mapper
+@Mapper(componentModel = "spring")
 public interface TransactionMapper {
 
   TransactionMapper instance = Mappers.getMapper(TransactionMapper.class);

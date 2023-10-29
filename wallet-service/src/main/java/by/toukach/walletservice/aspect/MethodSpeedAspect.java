@@ -3,6 +3,7 @@ package by.toukach.walletservice.aspect;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -15,7 +16,8 @@ import org.aspectj.lang.reflect.MethodSignature;
 @Aspect
 public class MethodSpeedAspect {
 
-  private static final String DEFINED_TIME = "Для выполнения метода %s.%s затраченное время %s %n";
+  private static final String DEFINED_TIME =
+      "%s Для выполнения метода %s.%s затраченное время %s %n";
   private static final String FILE_PATH = "ExecutedMethods.txt";
 
   @Pointcut("execution(public * *(..))")
@@ -44,7 +46,8 @@ public class MethodSpeedAspect {
         .getClassLoader().getResource(FILE_PATH).getPath();
 
     try (FileWriter writer = new FileWriter(new File(filePath), true)) {
-      writer.write(String.format(DEFINED_TIME, className, methodName, endTime - startTime));
+      writer.write(String.format(DEFINED_TIME, LocalDateTime.now().withNano(0),
+          className, methodName, endTime - startTime));
     } catch (IOException e) {
       return result;
     }

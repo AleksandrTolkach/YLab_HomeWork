@@ -2,7 +2,6 @@ package by.toukach.walletservice.repository.impl;
 
 import by.toukach.walletservice.entity.User;
 import by.toukach.walletservice.entity.rowmapper.RowMapper;
-import by.toukach.walletservice.entity.rowmapper.impl.UserRowMapper;
 import by.toukach.walletservice.exception.DbException;
 import by.toukach.walletservice.exception.ExceptionMessage;
 import by.toukach.walletservice.repository.DbInitializer;
@@ -12,23 +11,21 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Optional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
 
 /**
  * Класс для выполнения запросов, связанных с пользователями, в память.
  * */
+@Repository
+@RequiredArgsConstructor
 public class UserRepositoryImpl implements UserRepository {
 
-  public static final UserRepository instance = new UserRepositoryImpl();
   private static final String ID = "id";
   private static final String LOGIN = "login";
 
   private final DbInitializer dbInitializer;
   private final RowMapper<User> userRowMapper;
-
-  private UserRepositoryImpl() {
-    dbInitializer = DbInitializerImpl.getInstance();
-    userRowMapper = UserRowMapper.getInstance();
-  }
 
   @Override
   public User createUser(User user) {
@@ -84,20 +81,16 @@ public class UserRepositoryImpl implements UserRepository {
     return isExistsBy(LOGIN, login);
   }
 
-  public static UserRepository getInstance() {
-    return instance;
-  }
-
   private Optional<User> findUserBy(String argumentName, Object argumentValue) {
     Connection connection = dbInitializer.getConnection();
 
     try (PreparedStatement statement = connection.prepareStatement(
-            "SELECT users.id, users.created_at, login, password, role, "
-                + "accounts.id AS account_id, accounts.created_at AS account_created_at, "
-                + "title AS account_title, sum AS account_sum, user_id "
-                + "FROM application.users AS users "
-                + "LEFT JOIN application.accounts AS accounts ON users.id = accounts.user_id "
-                + "WHERE users." + argumentName + " = ? ")) {
+        "SELECT users.id, users.created_at, login, password, role, "
+            + "accounts.id AS account_id, accounts.created_at AS account_created_at, "
+            + "title AS account_title, sum AS account_sum, user_id "
+            + "FROM application.users AS users "
+            + "LEFT JOIN application.accounts AS accounts ON users.id = accounts.user_id "
+            + "WHERE users." + argumentName + " = ? ")) {
 
       statement.setObject(1, argumentValue);
 

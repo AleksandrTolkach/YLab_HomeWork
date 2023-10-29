@@ -14,4 +14,5 @@ public class ValidationMessages {
   public static final String NEGATIVE_ARGUMENT = "Значение должно быть больше нуля";
   public static final String UNKNOWN_TRANSACTION = "Указанный тип транзакции не существует";
   public static final String WRONG_TYPE = "Передан неверный тип данных";
+  public static final String WRONG_USER_ID = "Указан неверный пользователь";
 }

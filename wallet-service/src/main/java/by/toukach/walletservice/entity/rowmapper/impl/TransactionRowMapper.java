@@ -6,16 +6,14 @@ import by.toukach.walletservice.enumiration.TransactionType;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
+import org.springframework.stereotype.Component;
 
 /**
  * Класс для создания Transaction из ResultSet.
  * */
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@Component
 public class TransactionRowMapper implements RowMapper<Transaction> {
 
-  private static final RowMapper<Transaction> instance = new TransactionRowMapper();
   private static final String ID = "id";
   private static final String CREATED_AT = "created_at";
   private static final String TYPE = "type";
@@ -33,9 +31,5 @@ public class TransactionRowMapper implements RowMapper<Transaction> {
         .accountId(resultSet.getLong(ACCOUNT_ID))
         .value(resultSet.getBigDecimal(VALUE))
         .build();
-  }
-
-  public static RowMapper<Transaction> getInstance() {
-    return instance;
   }
 }
