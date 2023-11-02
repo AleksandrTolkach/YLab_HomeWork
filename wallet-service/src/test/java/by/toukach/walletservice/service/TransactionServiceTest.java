@@ -4,7 +4,6 @@ package by.toukach.walletservice.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
 import by.toukach.walletservice.BaseTest;
@@ -12,20 +11,17 @@ import by.toukach.walletservice.dto.TransactionDto;
 import by.toukach.walletservice.entity.Transaction;
 import by.toukach.walletservice.entity.mapper.TransactionMapperImpl;
 import by.toukach.walletservice.exception.EntityNotFoundException;
-import by.toukach.walletservice.repository.impl.TransactionRepositoryImpl;
+import by.toukach.walletservice.repository.TransactionRepository;
 import by.toukach.walletservice.service.impl.TransactionServiceImpl;
-import by.toukach.walletservice.service.impl.UserServiceImpl;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Optional;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -34,15 +30,14 @@ import org.mockito.quality.Strictness;
 @MockitoSettings(strictness = Strictness.LENIENT)
 public class TransactionServiceTest extends BaseTest {
 
+  @InjectMocks
   private TransactionServiceImpl transactionService;
   @Mock
-  private TransactionRepositoryImpl transactionRepository;
+  private TransactionRepository transactionRepository;
   @Mock
   private UserService userService;
   @Mock
   private TransactionMapperImpl transactionMapper;
-  private MockedStatic<TransactionRepositoryImpl> transactionRepositoryMock;
-  private MockedStatic<UserServiceImpl> userServiceMock;
   private TransactionDto transactionDto;
   private Transaction transaction;
 
@@ -51,25 +46,6 @@ public class TransactionServiceTest extends BaseTest {
       InstantiationException, IllegalAccessException {
     transactionDto = getCreditTransactionDto();
     transaction = getTransaction();
-
-    transactionRepositoryMock = mockStatic(TransactionRepositoryImpl.class);
-    transactionRepositoryMock.when(TransactionRepositoryImpl::getInstance)
-        .thenReturn(transactionRepository);
-
-    userServiceMock = mockStatic(UserServiceImpl.class);
-    userServiceMock.when(UserServiceImpl::getInstance).thenReturn(userService);
-
-    Constructor<TransactionServiceImpl> privateConstructor = TransactionServiceImpl.class
-        .getDeclaredConstructor();
-    privateConstructor.setAccessible(true);
-
-    transactionService = privateConstructor.newInstance();
-  }
-
-  @AfterEach
-  public void cleanUp() {
-    transactionRepositoryMock.close();
-    userServiceMock.close();
   }
 
   @Test
@@ -90,6 +66,7 @@ public class TransactionServiceTest extends BaseTest {
   public void findTransactionByIdTest_should_FindTransaction() {
     when(transactionRepository.findTransactionById(TRANSACTION_ID))
         .thenReturn(Optional.of(transaction));
+    when(transactionMapper.transactionToTransactionDto(transaction)).thenReturn(transactionDto);
 
     TransactionDto expectedResult = transactionDto;
     TransactionDto actualResult = transactionService.findTransactionById(TRANSACTION_ID);
@@ -112,6 +89,7 @@ public class TransactionServiceTest extends BaseTest {
     when(userService.isExists(USER_ID)).thenReturn(true);
     when(transactionRepository.findTransactionByUserId(USER_ID))
         .thenReturn(List.of(transaction));
+    when(transactionMapper.transactionToTransactionDto(transaction)).thenReturn(transactionDto);
 
     List<TransactionDto> expectedResult = List.of(transactionDto);
     List<TransactionDto> actualResult = transactionService.findTransactionByUserId(USER_ID);

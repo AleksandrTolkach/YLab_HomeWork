@@ -2,7 +2,6 @@ package by.toukach.walletservice.repository.impl;
 
 import by.toukach.walletservice.entity.Transaction;
 import by.toukach.walletservice.entity.rowmapper.RowMapper;
-import by.toukach.walletservice.entity.rowmapper.impl.TransactionRowMapper;
 import by.toukach.walletservice.exception.DbException;
 import by.toukach.walletservice.exception.ExceptionMessage;
 import by.toukach.walletservice.repository.DbInitializer;
@@ -15,23 +14,21 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
 
 /**
  * Класс для выполнения запросов, связанных с операциями, в память.
  * */
+@Repository
+@RequiredArgsConstructor
 public class TransactionRepositoryImpl implements TransactionRepository {
 
-  private static final TransactionRepository instance = new TransactionRepositoryImpl();
   private static final String ID = "id";
   private static final String USER_ID = "user_id";
 
   private final DbInitializer dbInitializer;
   private final RowMapper<Transaction> transactionRowMapper;
-
-  private TransactionRepositoryImpl() {
-    dbInitializer = DbInitializerImpl.getInstance();
-    transactionRowMapper = TransactionRowMapper.getInstance();
-  }
 
   @Override
   public Transaction createTransaction(Transaction transaction) {
@@ -112,17 +109,13 @@ public class TransactionRepositoryImpl implements TransactionRepository {
     }
   }
 
-  public static TransactionRepository getInstance() {
-    return instance;
-  }
-
   private List<Transaction> findTransactionsBy(String argumentName, Object argumentValue) {
     Connection connection = dbInitializer.getConnection();
 
     try (PreparedStatement statement = connection.prepareStatement(
-            "SELECT id, created_at, type, user_id, account_id, value "
-                + "FROM application.transactions "
-                + "WHERE " + argumentName + " = ?")) {
+        "SELECT id, created_at, type, user_id, account_id, value "
+            + "FROM application.transactions "
+            + "WHERE " + argumentName + " = ?")) {
 
       statement.setObject(1, argumentValue);
 

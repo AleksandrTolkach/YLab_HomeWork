@@ -5,17 +5,14 @@ import by.toukach.walletservice.exception.ValidationExceptionList;
 import by.toukach.walletservice.validator.ValidationMessages;
 import by.toukach.walletservice.validator.Validator;
 import java.math.BigDecimal;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
 
 /**
  * Класс для валидации параметров запроса.
  */
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@Component
 public class ParamValidator implements Validator<String> {
-
-  private static final Validator<String> instance = new ParamValidator();
 
   @Override
   public void validate(String param, String... types) {
@@ -53,10 +50,6 @@ public class ParamValidator implements Validator<String> {
     if (!validationExceptionList.isEmpty()) {
       throw validationExceptionList;
     }
-  }
-
-  public static Validator<String> getInstance() {
-    return instance;
   }
 
   /**

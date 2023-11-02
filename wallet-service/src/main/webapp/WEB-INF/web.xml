@@ -1,32 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
-                      http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
-  version="4.0">
-  <display-name>wallet-service</display-name>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+  xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
+  version="3.1">
+
+  <filter>
+    <filter-name>MyServletContainer</filter-name>
+
+    <filter-class>org.glassfish.jersey.servlet.ServletContainer
+    </filter-class>
+
+    <init-param>
+      <param-name>jakarta.ws.rs.Application</param-name>
+      <param-value>by.toukach.walletservice.config.MyResourceConfig</param-value>
+    </init-param>
+
+    <init-param>
+      <param-name>jersey.config.servlet.filter.staticContentRegex
+      </param-name>
+      <param-value>^((?!/swagger/).)*$</param-value>
+    </init-param>
+  </filter>
+
   <filter-mapping>
-    <filter-name>filter1</filter-name>
-    <url-pattern>/account</url-pattern>
-    <url-pattern>/transaction</url-pattern>
-    <url-pattern>/user</url-pattern>
-    <url-pattern>/auth/logout</url-pattern>
-    <url-pattern>/admin/*</url-pattern>
-  </filter-mapping>
-  <filter-mapping>
-    <filter-name>filter2</filter-name>
-    <url-pattern>/admin/*</url-pattern>
-  </filter-mapping>
-  <filter-mapping>
-    <filter-name>filter3</filter-name>
-    <url-pattern>/account</url-pattern>
-  </filter-mapping>
-  <filter-mapping>
-    <filter-name>filter4</filter-name>
-    <url-pattern>/user</url-pattern>
-  </filter-mapping>
-  <filter-mapping>
-    <filter-name>filter5</filter-name>
-    <url-pattern>/transaction</url-pattern>
+    <filter-name>MyServletContainer</filter-name>
+    <url-pattern>/*</url-pattern>
   </filter-mapping>
 </web-app>

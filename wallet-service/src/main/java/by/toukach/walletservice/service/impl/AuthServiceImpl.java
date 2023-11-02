@@ -2,70 +2,52 @@ package by.toukach.walletservice.service.impl;
 
 import by.toukach.walletservice.aspect.annotation.Loggable;
 import by.toukach.walletservice.dto.LogInDto;
-import by.toukach.walletservice.dto.LogInDtoResponse;
+import by.toukach.walletservice.dto.LogInResponseDto;
 import by.toukach.walletservice.dto.SignUpDto;
 import by.toukach.walletservice.dto.UserDto;
 import by.toukach.walletservice.enumiration.LogType;
 import by.toukach.walletservice.enumiration.UserRole;
-import by.toukach.walletservice.exception.EntityNotFoundException;
-import by.toukach.walletservice.exception.ExceptionMessage;
-import by.toukach.walletservice.security.Authentication;
-import by.toukach.walletservice.security.AuthenticationManager;
-import by.toukach.walletservice.security.impl.AuthenticationManagerImpl;
 import by.toukach.walletservice.service.AuthService;
 import by.toukach.walletservice.service.UserService;
+import by.toukach.walletservice.utils.CookieUtil;
+import by.toukach.walletservice.utils.JwtUtil;
 import by.toukach.walletservice.validator.Validator;
-import by.toukach.walletservice.validator.impl.LogInDtoValidator;
-import by.toukach.walletservice.validator.impl.SignUpDtoValidator;
 import java.util.ArrayList;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Repository;
 
 /**
  * Класс для аутентификации пользователей.
  */
+@Repository
+@RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
-  private static final AuthService instance = new AuthServiceImpl();
-
   private final UserService userService;
-  private final AuthenticationManager authenticationManager;
   private final Validator<LogInDto> logInDtoValidator;
   private final Validator<SignUpDto> signUpDtoValidator;
-
-  private AuthServiceImpl() {
-    userService = UserServiceImpl.getInstance();
-    authenticationManager = AuthenticationManagerImpl.getInstance();
-    logInDtoValidator = LogInDtoValidator.getInstance();
-    signUpDtoValidator = SignUpDtoValidator.getInstance();
-  }
+  private final AuthenticationManager authenticationManager;
 
   @Override
   @Loggable(type = LogType.LOG_IN)
-  public LogInDtoResponse logIn(LogInDto logInDto) {
+  public LogInResponseDto logIn(LogInDto logInDto) {
     logInDtoValidator.validate(logInDto);
 
-    try {
-      UserDto userDto = userService.findUserByLogin(logInDto.getLogin());
+    String login = logInDto.getLogin();
+    UserDto userDto = userService.findUserByLogin(login);
+    setAuthentication(login, logInDto.getPassword());
 
-      Authentication authentication = authenticationManager.authenticate(logInDto.getLogin(),
-          logInDto.getPassword());
-
-      if (!authentication.isAuthenticated()) {
-        throw new EntityNotFoundException();
-      } else {
-
-        return LogInDtoResponse.builder()
-            .authentication(authentication)
-            .userDto(userDto)
-            .build();
-      }
-    } catch (EntityNotFoundException e) {
-      throw new EntityNotFoundException(ExceptionMessage.WRONG_LOGIN_OR_PASSWORD);
-    }
+    return authenticateUser(userDto);
   }
 
   @Override
   @Loggable(type = LogType.SIGN_UP)
-  public LogInDtoResponse signUp(SignUpDto signUpDto) {
+  public LogInResponseDto signUp(SignUpDto signUpDto) {
     signUpDtoValidator.validate(signUpDto);
 
     String login = signUpDto.getLogin();
@@ -80,27 +62,32 @@ public class AuthServiceImpl implements AuthService {
 
     userDto = userService.createUser(userDto);
 
-    Authentication authentication = authenticationManager.authenticate(login, password);
+    setAuthentication(login, password);
 
-    return LogInDtoResponse.builder()
-        .authentication(authentication)
-        .userDto(userDto)
-        .build();
+    return authenticateUser(userDto);
   }
 
   @Override
   @Loggable(type = LogType.LOG_OUT)
-  public LogInDtoResponse logOut(String login) {
-    UserDto userDto = userService.findUserByLogin(login);
-    authenticationManager.clearAuthentication(login);
-    return LogInDtoResponse.builder()
-        .userDto(userDto)
+  public LogInResponseDto logOut() {
+    return LogInResponseDto.builder()
+        .accessTokenCookieString(CookieUtil.getCleanAccessCookie().toString())
         .build();
   }
 
-  public static AuthService getInstance() {
-    return instance;
+  private void setAuthentication(String login, String password) {
+    Authentication authenticate = authenticationManager.authenticate(
+        new UsernamePasswordAuthenticationToken(login, password));
+
+    SecurityContext context = SecurityContextHolder.getContext();
+    context.setAuthentication(authenticate);
   }
 
-
+  private LogInResponseDto authenticateUser(UserDto userDto) {
+    String accessToken = JwtUtil.generateTokenFromUsername(userDto.getLogin());
+    return LogInResponseDto.builder()
+        .accessTokenCookieString(CookieUtil.generateAccessCookie(accessToken).toString())
+        .userDto(userDto)
+        .build();
+  }
 }

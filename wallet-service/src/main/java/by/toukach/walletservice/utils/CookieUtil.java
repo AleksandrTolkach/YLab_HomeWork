@@ -5,6 +5,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import org.springframework.http.ResponseCookie;
 
 /**
  * Утилитарный класс для выполнения операции над Cookie.
@@ -23,13 +24,13 @@ public class CookieUtil {
    * @param token передаваемый токен.
    * @return запрашиваемая Cookie.
    */
-  public static Cookie generateAccessCookie(String token) {
-    Cookie cookie = new Cookie(ACCESS_COOKIE_NAME, token);
-    cookie.setPath(PATH);
-    cookie.setMaxAge(ACCESS_COOKIE_DURATION_SEC);
-    cookie.setHttpOnly(true);
-    cookie.setSecure(false);
-    return cookie;
+  public static ResponseCookie generateAccessCookie(String token) {
+    return ResponseCookie.from(ACCESS_COOKIE_NAME, token)
+        .path(PATH)
+        .maxAge(ACCESS_COOKIE_DURATION_SEC)
+        .httpOnly(true)
+        .secure(false)
+        .build();
   }
 
   /**
@@ -61,10 +62,7 @@ public class CookieUtil {
    *
    * @return запрашиваемый Cookie.
    */
-  public static Cookie getCleanAccessCookie() {
-    Cookie cookie = new Cookie(ACCESS_COOKIE_NAME, null);
-    cookie.setPath(PATH);
-    cookie.setMaxAge(0);
-    return cookie;
+  public static ResponseCookie getCleanAccessCookie() {
+    return ResponseCookie.from(ACCESS_COOKIE_NAME, null).path(PATH).build();
   }
 }

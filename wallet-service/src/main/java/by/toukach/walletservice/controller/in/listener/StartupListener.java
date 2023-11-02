@@ -1,22 +1,25 @@
 package by.toukach.walletservice.controller.in.listener;
 
+import by.toukach.walletservice.repository.DbInitializer;
 import by.toukach.walletservice.repository.Migration;
-import by.toukach.walletservice.repository.impl.DbInitializerImpl;
-import by.toukach.walletservice.repository.impl.MigrationImpl;
-import jakarta.servlet.ServletContextEvent;
-import jakarta.servlet.ServletContextListener;
-import jakarta.servlet.annotation.WebListener;
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
+import org.springframework.stereotype.Component;
 
 /**
  * Listener для выполнения миграции БД во время старта приложения.
  */
-@WebListener
-public class StartupListener implements ServletContextListener {
+@Component
+@RequiredArgsConstructor
+public class StartupListener {
 
-  @Override
-  public void contextInitialized(ServletContextEvent sce) {
-    DbInitializerImpl.getInstance();
-    Migration migration = MigrationImpl.getInstance();
+  private final DbInitializer dbInitializer;
+  private final Migration migration;
+
+  @EventListener(ContextRefreshedEvent.class)
+  public void handle() {
+    dbInitializer.prepareDb();
     migration.migrate();
   }
 }

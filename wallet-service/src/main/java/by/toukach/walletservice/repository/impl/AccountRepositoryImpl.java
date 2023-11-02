@@ -2,7 +2,6 @@ package by.toukach.walletservice.repository.impl;
 
 import by.toukach.walletservice.entity.Account;
 import by.toukach.walletservice.entity.rowmapper.RowMapper;
-import by.toukach.walletservice.entity.rowmapper.impl.AccountRowMapper;
 import by.toukach.walletservice.exception.DbException;
 import by.toukach.walletservice.exception.ExceptionMessage;
 import by.toukach.walletservice.repository.AccountRepository;
@@ -15,23 +14,21 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
 
 /**
  * Класс для выполнения запросов, связанных со счетом, в память.
  */
+@Repository
+@RequiredArgsConstructor
 public class AccountRepositoryImpl implements AccountRepository {
 
-  private static final AccountRepository instance = new AccountRepositoryImpl();
   private static final String ID = "id";
   private static final String USER_ID = "user_id";
 
   private final DbInitializer dbInitializer;
   private final RowMapper<Account> accountRowMapper;
-
-  private AccountRepositoryImpl() {
-    dbInitializer = DbInitializerImpl.getInstance();
-    accountRowMapper = AccountRowMapper.getInstance();
-  }
 
   @Override
   public Account createAccount(Account account) {
@@ -86,8 +83,8 @@ public class AccountRepositoryImpl implements AccountRepository {
     Long id = account.getId();
 
     try (PreparedStatement statement = connection.prepareStatement(
-            "UPDATE application.accounts SET title = ?, sum = ? "
-                + "WHERE id = ?")) {
+        "UPDATE application.accounts SET title = ?, sum = ? "
+            + "WHERE id = ?")) {
 
       statement.setString(1, account.getTitle());
       statement.setBigDecimal(2, account.getSum());
@@ -108,19 +105,14 @@ public class AccountRepositoryImpl implements AccountRepository {
     }
   }
 
-  public static AccountRepository getInstance() {
-    return instance;
-  }
-
-
   private List<Account> findAccountBy(String argumentName, Object argumentValue) {
     Connection connection = dbInitializer.getConnection();
 
     try (PreparedStatement statement = connection.prepareStatement(
-            "SELECT id AS account_id, created_at AS account_created_at, title AS account_title, "
-                + "sum AS account_sum, user_id "
-                + "FROM application.accounts "
-                + "WHERE " + argumentName + " = ? ")) {
+        "SELECT id AS account_id, created_at AS account_created_at, title AS account_title, "
+            + "sum AS account_sum, user_id "
+            + "FROM application.accounts "
+            + "WHERE " + argumentName + " = ? ")) {
 
       statement.setObject(1, argumentValue);
 

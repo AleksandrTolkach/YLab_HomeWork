@@ -3,9 +3,13 @@ package by.toukach.walletservice.repository;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import by.toukach.walletservice.ContainersEnvironment;
+import by.toukach.walletservice.config.PropertyConfig;
 import by.toukach.walletservice.entity.Account;
 import by.toukach.walletservice.entity.User;
+import by.toukach.walletservice.entity.rowmapper.impl.AccountRowMapper;
+import by.toukach.walletservice.entity.rowmapper.impl.UserRowMapper;
 import by.toukach.walletservice.repository.impl.AccountRepositoryImpl;
+import by.toukach.walletservice.repository.impl.DbInitializerImpl;
 import by.toukach.walletservice.repository.impl.MigrationImpl;
 import by.toukach.walletservice.repository.impl.UserRepositoryImpl;
 import java.util.Optional;
@@ -13,12 +17,27 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+@ExtendWith(SpringExtension.class)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@ContextConfiguration(classes = {MigrationImpl.class, DbInitializerImpl.class, PropertyConfig.class,
+    AccountRowMapper.class, AccountRepositoryImpl.class,
+    UserRowMapper.class, UserRepositoryImpl.class})
 public class AccountRepositoryTest extends ContainersEnvironment {
 
+  @Autowired
   private AccountRepository accountRepository;
+  @Autowired
   private UserRepository userRepository;
+  @Autowired
   private Migration migration;
+  @Autowired
+  private PropertyConfig propertyConfig;
   private Account createdAccount;
   private Account newAccount;
   private Account updatedAccount;
@@ -27,13 +46,9 @@ public class AccountRepositoryTest extends ContainersEnvironment {
 
   @BeforeEach
   public void setUp() throws NoSuchFieldException, IllegalAccessException {
-    injectTestJdbcUrl();
+    propertyConfig.setDataBaseUrl(postgreSQLContainer.getJdbcUrl());
 
-    migration = MigrationImpl.getInstance();
     migration.migrate();
-
-    accountRepository = AccountRepositoryImpl.getInstance();
-    userRepository = UserRepositoryImpl.getInstance();
 
     createdAccount = getCreatedAccount();
     newAccount = getNewAccount();

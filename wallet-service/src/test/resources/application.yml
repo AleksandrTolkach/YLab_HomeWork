@@ -1,0 +1,7 @@
+spring.datasource.url=
+spring.datasource.dataBaseName=
+spring.datasource.username=toukach
+spring.datasource.password=ylab
+spring.datasource.driver=org.postgresql.Driver
+spring.liquibase.changeLogFile=db/changelog/changelog.xml
+spring.liquibase.liquibaseSchema=liquibase

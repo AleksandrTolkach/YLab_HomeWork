@@ -3,137 +3,75 @@ package by.toukach.walletservice.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
 import by.toukach.walletservice.BaseTest;
 import by.toukach.walletservice.dto.LogInDto;
-import by.toukach.walletservice.dto.LogInDtoResponse;
+import by.toukach.walletservice.dto.LogInResponseDto;
 import by.toukach.walletservice.dto.SignUpDto;
 import by.toukach.walletservice.dto.UserDto;
-import by.toukach.walletservice.entity.Log;
 import by.toukach.walletservice.enumiration.UserRole;
 import by.toukach.walletservice.exception.EntityDuplicateException;
 import by.toukach.walletservice.exception.EntityNotFoundException;
-import by.toukach.walletservice.security.Authentication;
-import by.toukach.walletservice.security.impl.AuthenticationManagerImpl;
 import by.toukach.walletservice.service.impl.AuthServiceImpl;
-import by.toukach.walletservice.service.impl.LoggerServiceImpl;
-import by.toukach.walletservice.service.impl.UserServiceImpl;
-import by.toukach.walletservice.validator.impl.LogInDtoValidator;
-import by.toukach.walletservice.validator.impl.SignUpDtoValidator;
-import java.lang.reflect.Constructor;
+import by.toukach.walletservice.validator.Validator;
 import java.lang.reflect.InvocationTargetException;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.Authentication;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 public class AuthServiceTest extends BaseTest {
 
-  private AuthService authService;
+  @InjectMocks
+  private AuthServiceImpl authService;
   @Mock
-  private UserServiceImpl userService;
+  private UserService userService;
   @Mock
-  private LogInDtoValidator logInDtoValidator;
+  private Validator<LogInDto> logInDtoValidator;
   @Mock
-  private SignUpDtoValidator signUpDtoValidator;
+  private Validator<SignUpDto> signUpDtoValidator;
   @Mock
-  private AuthenticationManagerImpl authenticationManager;
-  @Mock
-  private LoggerServiceImpl loggerService;
-  private MockedStatic<UserServiceImpl> userServiceMock;
-  private MockedStatic<LogInDtoValidator> logInDtoValidatorMock;
-  private MockedStatic<SignUpDtoValidator> signUpDtoValidatorMock;
-  private MockedStatic<AuthenticationManagerImpl> authenticationManagerMock;
-  private MockedStatic<LoggerServiceImpl> loggerServiceMock;
-  private LogInDto logIn;
+  private AuthenticationManager authenticationManager;
+  private LogInDto logInDto;
   private SignUpDto signUp;
   private UserDto newUser;
   private UserDto createdUser;
-  private Authentication successfulAuthentication;
-  private Authentication unSuccessfulAuthentication;
-  private LogInDtoResponse logInDtoResponse;
-  private Log log;
+  private LogInResponseDto logInResponseDto;
+  private Authentication authentication;
 
   @BeforeEach
   public void setUp() throws NoSuchMethodException, InvocationTargetException,
       InstantiationException, IllegalAccessException {
-    logIn = getLogIn();
+    logInDto = getLogIn();
     signUp = getSignUp();
     newUser = getNewUserDto();
     createdUser = getCreatedUserDto();
-    successfulAuthentication = getSuccessfulAuthentication();
-    unSuccessfulAuthentication = getUnSuccessfulAuthentication();
-    logInDtoResponse = getLogInDtoResponse();
-    log = getCreatedLog();
-
-    userServiceMock = mockStatic(UserServiceImpl.class);
-    userServiceMock.when(UserServiceImpl::getInstance).thenReturn(userService);
-
-    logInDtoValidatorMock = mockStatic(LogInDtoValidator.class);
-    logInDtoValidatorMock.when(LogInDtoValidator::getInstance).thenReturn(logInDtoValidator);
-
-    signUpDtoValidatorMock = mockStatic(SignUpDtoValidator.class);
-    signUpDtoValidatorMock.when(SignUpDtoValidator::getInstance).thenReturn(signUpDtoValidator);
-
-    authenticationManagerMock = mockStatic(AuthenticationManagerImpl.class);
-    authenticationManagerMock.when(AuthenticationManagerImpl::getInstance)
-        .thenReturn(authenticationManager);
-
-    loggerServiceMock = mockStatic(LoggerServiceImpl.class);
-    logInDtoValidatorMock.when(LoggerServiceImpl::getInstance).thenReturn(loggerService);
-
-    Constructor<AuthServiceImpl> privateConstructor = AuthServiceImpl.class
-        .getDeclaredConstructor();
-    privateConstructor.setAccessible(true);
-
-    authService = privateConstructor.newInstance();
-  }
-
-  @AfterEach
-  public void cleanUp() {
-    userServiceMock.close();
-    logInDtoValidatorMock.close();
-    signUpDtoValidatorMock.close();
-    authenticationManagerMock.close();
-    loggerServiceMock.close();
+    logInResponseDto = getLogInDtoResponse();
+    authentication = getAuthentication();
   }
 
   @Test
   @DisplayName("Тест входа в приложения")
   public void logInTest_should_SuccessfullyLogIn() {
-    doNothing().when(logInDtoValidator).validate(logIn);
+    doNothing().when(logInDtoValidator).validate(logInDto);
+    when(authenticationManager.authenticate(authentication)).thenReturn(authentication);
     when(userService.findUserByLogin(LOGIN)).thenReturn(createdUser);
-    when(authenticationManager.authenticate(LOGIN, PASSWORD)).thenReturn(successfulAuthentication);
-    when(loggerService.createLog(any())).thenReturn(log);
 
-    LogInDtoResponse expectedResult = logInDtoResponse;
-    LogInDtoResponse actualResult = authService.logIn(logIn);
+    LogInResponseDto expectedResult = logInResponseDto;
+    LogInResponseDto actualResult = authService.logIn(logInDto);
 
     assertThat(actualResult).isEqualTo(expectedResult);
-  }
-
-  @Test
-  @DisplayName("Тест входа в приложение с некорректным паролем")
-  public void logInTest_should_ThrowError_WhenPasswordIncorrect() {
-    logIn.setPassword(INCORRECT_PASSWORD);
-    when(userService.findUserByLogin(LOGIN)).thenReturn(createdUser);
-    when(authenticationManager.authenticate(LOGIN, INCORRECT_PASSWORD))
-        .thenReturn(unSuccessfulAuthentication);
-
-    assertThatThrownBy(() -> authService.logIn(logIn))
-        .isInstanceOf(EntityNotFoundException.class);
   }
 
   @Test
@@ -141,7 +79,7 @@ public class AuthServiceTest extends BaseTest {
   public void logInTest_should_ThrowError_WhenLoginIncorrect() {
     when(userService.findUserByLogin(LOGIN)).thenThrow(EntityNotFoundException.class);
 
-    assertThatThrownBy(() -> authService.logIn(logIn))
+    assertThatThrownBy(() -> authService.logIn(logInDto))
         .isInstanceOf(EntityNotFoundException.class);
   }
 
@@ -151,11 +89,10 @@ public class AuthServiceTest extends BaseTest {
     doNothing().when(signUpDtoValidator).validate(signUp);
     newUser.setRole(UserRole.USER);
     when(userService.createUser(newUser)).thenReturn(createdUser);
-    when(authenticationManager.authenticate(LOGIN, PASSWORD)).thenReturn(successfulAuthentication);
-    when(loggerService.createLog(any())).thenReturn(log);
+    when(authenticationManager.authenticate(authentication)).thenReturn(authentication);
 
-    LogInDtoResponse expectedResult = logInDtoResponse;
-    LogInDtoResponse actualResult = authService.signUp(signUp);
+    LogInResponseDto expectedResult = logInResponseDto;
+    LogInResponseDto actualResult = authService.signUp(signUp);
 
     assertThat(actualResult).isEqualTo(expectedResult);
   }

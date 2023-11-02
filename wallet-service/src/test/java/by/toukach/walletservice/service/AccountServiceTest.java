@@ -5,31 +5,28 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
 import by.toukach.walletservice.BaseTest;
 import by.toukach.walletservice.dto.AccountDto;
+import by.toukach.walletservice.dto.LogDto;
 import by.toukach.walletservice.dto.UserDto;
 import by.toukach.walletservice.entity.Account;
-import by.toukach.walletservice.entity.mapper.AccountMapperImpl;
+import by.toukach.walletservice.entity.mapper.AccountMapper;
 import by.toukach.walletservice.exception.EntityNotFoundException;
-import by.toukach.walletservice.repository.impl.AccountRepositoryImpl;
+import by.toukach.walletservice.repository.AccountRepository;
 import by.toukach.walletservice.service.impl.AccountServiceImpl;
-import by.toukach.walletservice.service.impl.LoggerServiceImpl;
-import by.toukach.walletservice.service.impl.UserServiceImpl;
-import by.toukach.walletservice.validator.impl.AccountDtoValidator;
-import java.lang.reflect.Constructor;
+import by.toukach.walletservice.validator.Validator;
+import by.toukach.walletservice.validator.impl.ParamValidator.Type;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Optional;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -38,21 +35,18 @@ import org.mockito.quality.Strictness;
 @MockitoSettings(strictness = Strictness.LENIENT)
 public class AccountServiceTest extends BaseTest {
 
+  @InjectMocks
   private AccountServiceImpl accountService;
   @Mock
-  private AccountRepositoryImpl accountRepository;
+  private AccountRepository accountRepository;
   @Mock
-  private UserServiceImpl userService;
+  private UserService userService;
   @Mock
-  private LoggerServiceImpl loggerService;
+  private Validator<AccountDto> accountDtoValidator;
   @Mock
-  private AccountDtoValidator accountDtoValidator;
+  private Validator<String> paramValidator;
   @Mock
-  private AccountMapperImpl accountMapper;
-  private MockedStatic<UserServiceImpl> userServiceMock;
-  private MockedStatic<AccountRepositoryImpl> accountRepositoryMock;
-  private MockedStatic<LoggerServiceImpl> loggerServiceMock;
-  private MockedStatic<AccountDtoValidator> accountDtoValidatorMock;
+  private AccountMapper accountMapper;
   private UserDto createdUser;
   private AccountDto newAccountDto;
   private AccountDto createdAccountDto;
@@ -61,6 +55,7 @@ public class AccountServiceTest extends BaseTest {
   private Account createdAccount;
   private Account updatedAccount;
   private List<Account> accountList;
+  private LogDto logDto;
 
   @BeforeEach
   public void setUp() throws NoSuchMethodException, InvocationTargetException,
@@ -73,32 +68,7 @@ public class AccountServiceTest extends BaseTest {
     createdAccount = getCreatedAccount();
     updatedAccount = getUpdatedAccount();
     accountList = getAccountList();
-
-    userServiceMock = mockStatic(UserServiceImpl.class);
-    userServiceMock.when(UserServiceImpl::getInstance).thenReturn(userService);
-
-    accountRepositoryMock = mockStatic(AccountRepositoryImpl.class);
-    accountRepositoryMock.when(AccountRepositoryImpl::getInstance).thenReturn(accountRepository);
-
-    loggerServiceMock = mockStatic(LoggerServiceImpl.class);
-    loggerServiceMock.when(LoggerServiceImpl::getInstance).thenReturn(loggerService);
-
-    accountDtoValidatorMock = mockStatic(AccountDtoValidator.class);
-    accountDtoValidatorMock.when(AccountDtoValidator::getInstance).thenReturn(accountDtoValidator);
-
-    Constructor<AccountServiceImpl> privateConstructor = AccountServiceImpl.class
-        .getDeclaredConstructor();
-    privateConstructor.setAccessible(true);
-
-    accountService = privateConstructor.newInstance();
-  }
-
-  @AfterEach
-  public void cleanUp() {
-    userServiceMock.close();
-    accountRepositoryMock.close();
-    loggerServiceMock.close();
-    accountDtoValidatorMock.close();
+    logDto = getCreatedLogDto();
   }
 
   @Test
@@ -151,7 +121,10 @@ public class AccountServiceTest extends BaseTest {
   @Test
   @DisplayName("Тест поиска счета в приложении по ID пользователя")
   public void findAccountsByUserIdTest_should_FindAccount() {
+    doNothing().when(paramValidator)
+        .validate(String.valueOf(USER_ID), Type.ID.name(), USER_ID_PARAM);
     when(accountRepository.findAccountsByUserId(USER_ID)).thenReturn(accountList);
+    when(accountMapper.accountToAccountDto(createdAccount)).thenReturn(createdAccountDto);
 
     List<AccountDto> expectedResult = List.of(createdAccountDto);
     List<AccountDto> actualResult = accountService.findAccountsByUserId(USER_ID);
@@ -172,10 +145,11 @@ public class AccountServiceTest extends BaseTest {
   @Test
   @DisplayName("Тест обновления счета в приложении")
   public void updateAccountTest_should_UpdateAccount() {
+    doNothing().when(accountDtoValidator).validate(updatedAccountDto);
     when(userService.isExists(USER_ID)).thenReturn(true);
     when(accountRepository.findAccountById(ACCOUNT_ID)).thenReturn(Optional.of(createdAccount));
     when(accountRepository.updateAccount(createdAccount)).thenReturn(Optional.of(updatedAccount));
-    when(accountMapper.accountToAccountDto(createdAccount)).thenReturn(createdAccountDto);
+    when(accountMapper.accountToAccountDto(updatedAccount)).thenReturn(updatedAccountDto);
 
     AccountDto expectedResult = updatedAccountDto;
     AccountDto actualResult = accountService.updateAccount(updatedAccountDto);
