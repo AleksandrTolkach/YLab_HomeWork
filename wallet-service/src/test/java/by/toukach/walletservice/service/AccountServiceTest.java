@@ -9,13 +9,14 @@ import static org.mockito.Mockito.when;
 
 import by.toukach.walletservice.BaseTest;
 import by.toukach.walletservice.dto.AccountDto;
-import by.toukach.walletservice.dto.LogDto;
+import by.toukach.walletservice.dto.CreateAccountDto;
 import by.toukach.walletservice.dto.UserDto;
 import by.toukach.walletservice.entity.Account;
-import by.toukach.walletservice.entity.mapper.AccountMapper;
 import by.toukach.walletservice.exception.EntityNotFoundException;
+import by.toukach.walletservice.mapper.AccountMapper;
 import by.toukach.walletservice.repository.AccountRepository;
-import by.toukach.walletservice.service.impl.AccountServiceImpl;
+import by.toukach.walletservice.service.account.impl.AccountServiceImpl;
+import by.toukach.walletservice.service.user.UserService;
 import by.toukach.walletservice.validator.Validator;
 import by.toukach.walletservice.validator.impl.ParamValidator.Type;
 import java.lang.reflect.InvocationTargetException;
@@ -44,6 +45,8 @@ public class AccountServiceTest extends BaseTest {
   @Mock
   private Validator<AccountDto> accountDtoValidator;
   @Mock
+  private Validator<CreateAccountDto> createAccountDtoValidator;
+  @Mock
   private Validator<String> paramValidator;
   @Mock
   private AccountMapper accountMapper;
@@ -51,11 +54,11 @@ public class AccountServiceTest extends BaseTest {
   private AccountDto newAccountDto;
   private AccountDto createdAccountDto;
   private AccountDto updatedAccountDto;
+  private CreateAccountDto createAccountDto;
   private Account newAccount;
   private Account createdAccount;
   private Account updatedAccount;
   private List<Account> accountList;
-  private LogDto logDto;
 
   @BeforeEach
   public void setUp() throws NoSuchMethodException, InvocationTargetException,
@@ -64,24 +67,24 @@ public class AccountServiceTest extends BaseTest {
     newAccountDto = getNewAccountDto();
     createdAccountDto = getCreatedAccountDto();
     updatedAccountDto = getUpdatedAccountDto();
+    createAccountDto = getCreateAccountDto();
     newAccount = getNewAccount();
     createdAccount = getCreatedAccount();
     updatedAccount = getUpdatedAccount();
     accountList = getAccountList();
-    logDto = getCreatedLogDto();
   }
 
   @Test
   @DisplayName("Тест создания счета в приложении")
   public void createAccountTest_should_CreateAccount() {
-    doNothing().when(accountDtoValidator).validate(newAccountDto);
+    doNothing().when(createAccountDtoValidator).validate(createAccountDto);
     when(userService.findUserById(USER_ID)).thenReturn(createdUser);
-    when(accountMapper.accountDtoToAccount(newAccountDto)).thenReturn(newAccount);
+    when(accountMapper.createAccountDtoToAccount(createAccountDto)).thenReturn(newAccount);
     when(accountRepository.createAccount(any())).thenReturn(createdAccount);
     when(accountMapper.accountToAccountDto(createdAccount)).thenReturn(createdAccountDto);
 
     AccountDto expectedResult = createdAccountDto;
-    AccountDto actualResult = accountService.createAccount(newAccountDto);
+    AccountDto actualResult = accountService.createAccount(createAccountDto);
 
     assertThat(actualResult).isEqualTo(expectedResult);
   }
@@ -89,10 +92,10 @@ public class AccountServiceTest extends BaseTest {
   @Test
   @DisplayName("Тест создания счета в приложении для несуществующего пользователя")
   public void createAccountTest_should_ThrowError_WhenUserNotExist() {
-    doNothing().when(accountDtoValidator).validate(newAccountDto);
+    doNothing().when(createAccountDtoValidator).validate(createAccountDto);
     when(userService.findUserById(USER_ID)).thenThrow(EntityNotFoundException.class);
 
-    assertThatThrownBy(() -> accountService.createAccount(newAccountDto))
+    assertThatThrownBy(() -> accountService.createAccount(createAccountDto))
         .isInstanceOf(EntityNotFoundException.class);
   }
 

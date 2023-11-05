@@ -4,12 +4,12 @@ package by.toukach.walletservice.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
+import by.toukach.logger.dto.LogDto;
+import by.toukach.logger.entity.Log;
+import by.toukach.logger.entity.mapper.LogMapper;
+import by.toukach.logger.repository.LoggerRepository;
+import by.toukach.logger.service.impl.LoggerServiceImpl;
 import by.toukach.walletservice.BaseTest;
-import by.toukach.walletservice.dto.LogDto;
-import by.toukach.walletservice.entity.Log;
-import by.toukach.walletservice.entity.mapper.LogMapper;
-import by.toukach.walletservice.repository.LoggerRepository;
-import by.toukach.walletservice.service.impl.LoggerServiceImpl;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;

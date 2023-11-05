@@ -10,14 +10,6 @@ services:
     networks:
       - wallet-service
 
-  ryuk:
-    image: testcontainers/ryuk:latest
-    restart: unless-stopped
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    networks:
-      - wallet-service
-
 networks:
   wallet-service:
     name: wallet-service

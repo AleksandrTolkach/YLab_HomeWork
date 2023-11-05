@@ -1,8 +1,9 @@
 package by.toukach.walletservice.controller.in.rest;
 
 import by.toukach.walletservice.dto.AccountDto;
+import by.toukach.walletservice.dto.CreateAccountDto;
 import by.toukach.walletservice.security.UserDetailsImpl;
-import by.toukach.walletservice.service.AccountService;
+import by.toukach.walletservice.service.account.AccountService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -60,13 +61,14 @@ public class AccountController {
   /**
    * Метод для обработки запросов по созданию счета.
    *
-   * @param accountDto создаваемый счет.
+   * @param createAccountDto создаваемый счет.
    * @return созданный счет.
    */
   @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
   @ResponseStatus(HttpStatus.CREATED)
   @PreAuthorize("hasRole('USER')")
-  public AccountDto createAccount(@RequestBody(required = false) AccountDto accountDto) {
-    return accountService.createAccount(accountDto);
+  public AccountDto createAccount(
+      @RequestBody(required = false) CreateAccountDto createAccountDto) {
+    return accountService.createAccount(createAccountDto);
   }
 }

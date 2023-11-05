@@ -12,6 +12,8 @@
 
     <modules>
         <module>wallet-service</module>
+        <module>speed-spring-boot-starter</module>
+        <module>logger-spring-boot-starter</module>
     </modules>
 
 </project>

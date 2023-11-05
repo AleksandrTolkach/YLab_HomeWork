@@ -1,20 +1,16 @@
 package by.toukach.walletservice.repository.impl;
 
 import by.toukach.walletservice.entity.Account;
-import by.toukach.walletservice.entity.rowmapper.RowMapper;
-import by.toukach.walletservice.exception.DbException;
-import by.toukach.walletservice.exception.ExceptionMessage;
 import by.toukach.walletservice.repository.AccountRepository;
-import by.toukach.walletservice.repository.DbInitializer;
-import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -26,41 +22,36 @@ public class AccountRepositoryImpl implements AccountRepository {
 
   private static final String ID = "id";
   private static final String USER_ID = "user_id";
+  private static final String INSERT_SQL =
+      "INSERT INTO application.accounts (created_at, title, sum, user_id) "
+          + "VALUES (?, ?, ?, ?) RETURNING ID";
+  private static final String UPDATE_SQL =
+      "UPDATE application.accounts SET title = ?, sum = ? WHERE id = ?";
+  private static final String SELECT_SQL = "SELECT id AS account_id, "
+      + "created_at AS account_created_at, title AS account_title, sum AS account_sum, user_id "
+      + "FROM application.accounts "
+      + "WHERE %s = '%s'";
 
-  private final DbInitializer dbInitializer;
+  private final JdbcTemplate jdbcTemplate;
   private final RowMapper<Account> accountRowMapper;
 
   @Override
   public Account createAccount(Account account) {
-    Connection connection = dbInitializer.getConnection();
+    KeyHolder keyHolder = new GeneratedKeyHolder();
 
-    try (PreparedStatement statement = connection.prepareStatement(
-        "INSERT INTO application.accounts (created_at, title, sum, user_id) "
-            + "VALUES (?, ?, ?, ?)",
-        Statement.RETURN_GENERATED_KEYS)) {
+    jdbcTemplate.update(connection -> {
+      PreparedStatement statement = connection.prepareStatement(INSERT_SQL,
+          Statement.RETURN_GENERATED_KEYS);
 
       statement.setObject(1, account.getCreatedAt());
       statement.setString(2, account.getTitle());
       statement.setBigDecimal(3, account.getSum());
       statement.setLong(4, account.getUserId());
+      return statement;
+    }, keyHolder);
 
-      statement.execute();
-
-      ResultSet generatedKeys = statement.getGeneratedKeys();
-
-      if (generatedKeys.next()) {
-        account.setId(generatedKeys.getLong(ID));
-      }
-
-    } catch (SQLException e) {
-      throw new DbException(ExceptionMessage.SAVE_ACCOUNT, e);
-    } finally {
-      try {
-        connection.close();
-      } catch (SQLException e) {
-        System.err.println(ExceptionMessage.CLOSE_CONNECTION_TO_DB);
-      }
-    }
+    Long id = keyHolder.getKey() != null ? keyHolder.getKeyAs(Long.class) : null;
+    account.setId(id);
 
     return account;
   }
@@ -79,60 +70,15 @@ public class AccountRepositoryImpl implements AccountRepository {
 
   @Override
   public Optional<Account> updateAccount(Account account) {
-    Connection connection = dbInitializer.getConnection();
     Long id = account.getId();
 
-    try (PreparedStatement statement = connection.prepareStatement(
-        "UPDATE application.accounts SET title = ?, sum = ? "
-            + "WHERE id = ?")) {
+    int updatedRows = jdbcTemplate.update(UPDATE_SQL, account.getTitle(), account.getSum(), id);
 
-      statement.setString(1, account.getTitle());
-      statement.setBigDecimal(2, account.getSum());
-      statement.setLong(3, id);
-
-      int updatedRows = statement.executeUpdate();
-
-      return updatedRows != 0 ? findAccountById(id) : Optional.empty();
-
-    } catch (SQLException e) {
-      throw new DbException(ExceptionMessage.ACCOUNT_UPDATE, e);
-    } finally {
-      try {
-        connection.close();
-      } catch (SQLException e) {
-        System.err.println(ExceptionMessage.CLOSE_CONNECTION_TO_DB);
-      }
-    }
+    return updatedRows != 0 ? findAccountById(id) : Optional.empty();
   }
 
   private List<Account> findAccountBy(String argumentName, Object argumentValue) {
-    Connection connection = dbInitializer.getConnection();
-
-    try (PreparedStatement statement = connection.prepareStatement(
-        "SELECT id AS account_id, created_at AS account_created_at, title AS account_title, "
-            + "sum AS account_sum, user_id "
-            + "FROM application.accounts "
-            + "WHERE " + argumentName + " = ? ")) {
-
-      statement.setObject(1, argumentValue);
-
-      ResultSet resultSet = statement.executeQuery();
-
-      List<Account> accountList = new ArrayList<>();
-      while (resultSet.next()) {
-        accountList.add(accountRowMapper.mapRow(resultSet));
-      }
-
-      return accountList;
-
-    } catch (SQLException e) {
-      throw new DbException(ExceptionMessage.DB_REQUEST, e);
-    } finally {
-      try {
-        connection.close();
-      } catch (SQLException e) {
-        System.err.println(ExceptionMessage.CLOSE_CONNECTION_TO_DB);
-      }
-    }
+    return jdbcTemplate.query(String.format(SELECT_SQL, argumentName, argumentValue),
+        accountRowMapper::mapRow);
   }
 }

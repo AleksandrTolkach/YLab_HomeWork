@@ -9,12 +9,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import by.toukach.walletservice.BaseTest;
 import by.toukach.walletservice.UserDetailsArgumentResolver;
-import by.toukach.walletservice.config.MainWebAppInitializer;
+import by.toukach.walletservice.dto.CreateTransactionDto;
 import by.toukach.walletservice.dto.TransactionDto;
 import by.toukach.walletservice.enumiration.TransactionType;
-import by.toukach.walletservice.service.TransactionService;
-import by.toukach.walletservice.service.handler.TransactionHandler;
-import by.toukach.walletservice.service.handler.TransactionHandlerFactory;
+import by.toukach.walletservice.service.transaction.TransactionHandler;
+import by.toukach.walletservice.service.transaction.TransactionHandlerFactory;
+import by.toukach.walletservice.service.transaction.TransactionService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,17 +23,19 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 @ExtendWith({SpringExtension.class, MockitoExtension.class})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-@SpringJUnitWebConfig(classes = {MainWebAppInitializer.class})
+@AutoConfigureMockMvc
+@ActiveProfiles("test")
 public class TransactionControllerTest extends BaseTest {
 
   private MockMvc mockMvc;
@@ -44,12 +46,12 @@ public class TransactionControllerTest extends BaseTest {
   @Mock
   private TransactionService transactionService;
   private TransactionDto creditTransactionDto;
-  private TransactionDto newTransaction;
+  private CreateTransactionDto creditCreateTransactionDto;
 
   @BeforeEach
   public void setUp() throws Exception {
     creditTransactionDto = getCreditTransactionDto();
-    newTransaction = getNewCreditTransactionDto();
+    creditCreateTransactionDto = getCreditCreateTransactionDto();
 
     mockMvc = MockMvcBuilders.standaloneSetup(new TransactionController(transactionHandlerFactory,
         transactionService))
@@ -59,7 +61,7 @@ public class TransactionControllerTest extends BaseTest {
 
   @Test
   @DisplayName("Тест поиска транзакций по ID пользователя")
-  public void findTransactionsByUserIdTest_should_ReturnTransactions() throws Exception{
+  public void findTransactionsByUserIdTest_should_ReturnTransactions() throws Exception {
     when(transactionService.findTransactionByUserId(USER_ID))
         .thenReturn(List.of(creditTransactionDto));
 
@@ -78,10 +80,10 @@ public class TransactionControllerTest extends BaseTest {
 
   @Test
   @DisplayName("Тест создания транзакции")
-  public void createTransactionTest_should_CreateTransaction() throws Exception{
+  public void createTransactionTest_should_CreateTransaction() throws Exception {
     when(transactionHandlerFactory.getHandler(TransactionType.CREDIT))
         .thenReturn(transactionHandler);
-    when(transactionHandler.handle(newTransaction)).thenReturn(creditTransactionDto);
+    when(transactionHandler.handle(creditCreateTransactionDto)).thenReturn(creditTransactionDto);
 
     String creditTransactionJson = readJsonFile(CREDIT_TRANSACTION_FILE_PATH);
 

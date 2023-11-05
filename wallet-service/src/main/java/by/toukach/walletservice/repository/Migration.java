@@ -6,11 +6,6 @@ package by.toukach.walletservice.repository;
 public interface Migration {
 
   /**
-   * Метод для миграции БД.
-   */
-  void migrate();
-
-  /**
    * Откат внесенных изменений до определенного тега.
    *
    * @param tag тег, то которого необходимо откатить БД.
