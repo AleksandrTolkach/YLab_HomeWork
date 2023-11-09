@@ -1,11 +1,11 @@
 package by.toukach.walletservice.entity.rowmapper.impl;
 
 import by.toukach.walletservice.entity.Transaction;
-import by.toukach.walletservice.entity.rowmapper.RowMapper;
 import by.toukach.walletservice.enumiration.TransactionType;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 
 /**
@@ -22,7 +22,7 @@ public class TransactionRowMapper implements RowMapper<Transaction> {
   private static final String VALUE = "value";
 
   @Override
-  public Transaction mapRow(ResultSet resultSet) throws SQLException {
+  public Transaction mapRow(ResultSet resultSet, int rowNum) throws SQLException {
     return Transaction.builder()
         .id(resultSet.getLong(ID))
         .createdAt(resultSet.getObject(CREATED_AT, LocalDateTime.class))

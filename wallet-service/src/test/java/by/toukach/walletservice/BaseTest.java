@@ -1,7 +1,11 @@
 package by.toukach.walletservice;
 
+import by.toukach.logger.dto.LogDto;
+import by.toukach.logger.entity.Log;
+import by.toukach.logger.enumiration.LogType;
 import by.toukach.walletservice.dto.AccountDto;
-import by.toukach.walletservice.dto.LogDto;
+import by.toukach.walletservice.dto.CreateAccountDto;
+import by.toukach.walletservice.dto.CreateTransactionDto;
 import by.toukach.walletservice.dto.LogInDto;
 import by.toukach.walletservice.dto.LogInResponseDto;
 import by.toukach.walletservice.dto.SignUpDto;
@@ -10,10 +14,8 @@ import by.toukach.walletservice.dto.UserDto;
 import by.toukach.walletservice.dto.serializer.LocalDateTimeCustomDeserializer;
 import by.toukach.walletservice.dto.serializer.LocalDateTimeCustomSerializer;
 import by.toukach.walletservice.entity.Account;
-import by.toukach.walletservice.entity.Log;
 import by.toukach.walletservice.entity.Transaction;
 import by.toukach.walletservice.entity.User;
-import by.toukach.walletservice.enumiration.LogType;
 import by.toukach.walletservice.enumiration.TransactionType;
 import by.toukach.walletservice.enumiration.UserRole;
 import by.toukach.walletservice.exception.ExceptionMessage;
@@ -216,6 +218,14 @@ public class BaseTest {
         .build();
   }
 
+  protected CreateAccountDto getCreateAccountDto() {
+    return CreateAccountDto.builder()
+        .title(ACCOUNT_TITLE)
+        .sum(ACCOUNT_SUM)
+        .userId(USER_ID)
+        .build();
+  }
+
   protected AccountDto getCreatedAccountDto() {
     AccountDto account = getNewAccountDto();
     account.setId(ACCOUNT_ID);
@@ -283,6 +293,24 @@ public class BaseTest {
   protected TransactionDto getNewCreditTransactionDto() {
     return TransactionDto.builder()
         .type(TransactionType.CREDIT)
+        .userId(USER_ID)
+        .accountId(ACCOUNT_ID)
+        .value(TRANSACTION_VALUE)
+        .build();
+  }
+
+  protected CreateTransactionDto getCreditCreateTransactionDto() {
+    return CreateTransactionDto.builder()
+        .type(TransactionType.CREDIT)
+        .userId(USER_ID)
+        .accountId(ACCOUNT_ID)
+        .value(TRANSACTION_VALUE)
+        .build();
+  }
+
+  protected CreateTransactionDto getDebitCreateTransactionDto() {
+    return CreateTransactionDto.builder()
+        .type(TransactionType.DEBIT)
         .userId(USER_ID)
         .accountId(ACCOUNT_ID)
         .value(TRANSACTION_VALUE)

@@ -17,11 +17,12 @@ public class PostgresTestContainer extends PostgreSQLContainer<PostgresTestConta
 
   public static PostgreSQLContainer getInstance() {
     if (container == null) {
-      container = new PostgreSQLContainer()
+      container = new PostgreSQLContainer(IMAGE_VERSION)
           .withDatabaseName(DB_NAME)
           .withUsername(DB_USERNAME)
           .withPassword(DB_PASSWORD);
       container.withInitScript(INIT_SCRIPT_PATH);
+      container.getDriverClassName();
     }
     return container;
   }
@@ -29,5 +30,7 @@ public class PostgresTestContainer extends PostgreSQLContainer<PostgresTestConta
   @Override
   public void start() {
     super.start();
+    System.setProperty("spring.datasource.url", container.getJdbcUrl());
+    System.setProperty("spring.liquibase.url", container.getJdbcUrl());
   }
 }

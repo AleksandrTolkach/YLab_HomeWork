@@ -1,10 +1,11 @@
 package by.toukach.walletservice.controller.in.rest;
 
+import by.toukach.walletservice.dto.CreateTransactionDto;
 import by.toukach.walletservice.dto.TransactionDto;
 import by.toukach.walletservice.security.UserDetailsImpl;
-import by.toukach.walletservice.service.TransactionService;
-import by.toukach.walletservice.service.handler.TransactionHandler;
-import by.toukach.walletservice.service.handler.TransactionHandlerFactory;
+import by.toukach.walletservice.service.transaction.TransactionHandler;
+import by.toukach.walletservice.service.transaction.TransactionHandlerFactory;
+import by.toukach.walletservice.service.transaction.TransactionService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -46,15 +47,16 @@ public class TransactionController {
   /**
    * Метод для обработки запроса на создание трназакции.
    *
-   * @param transactionDto данные о транзакции.
+   * @param createTransactionDto данные о транзакции.
    * @return обработанная транзакция.
    */
   @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
   @ResponseStatus(HttpStatus.CREATED)
   @PreAuthorize("hasRole('USER')")
   public TransactionDto createTransaction(
-      @RequestBody(required = false) TransactionDto transactionDto) {
-    TransactionHandler handler = transactionHandlerFactory.getHandler(transactionDto.getType());
-    return handler.handle(transactionDto);
+      @RequestBody(required = false) CreateTransactionDto createTransactionDto) {
+    TransactionHandler handler =
+        transactionHandlerFactory.getHandler(createTransactionDto.getType());
+    return handler.handle(createTransactionDto);
   }
 }

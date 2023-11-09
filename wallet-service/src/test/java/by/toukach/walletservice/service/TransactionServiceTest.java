@@ -7,12 +7,14 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import by.toukach.walletservice.BaseTest;
+import by.toukach.walletservice.dto.CreateTransactionDto;
 import by.toukach.walletservice.dto.TransactionDto;
 import by.toukach.walletservice.entity.Transaction;
-import by.toukach.walletservice.entity.mapper.TransactionMapperImpl;
 import by.toukach.walletservice.exception.EntityNotFoundException;
+import by.toukach.walletservice.mapper.TransactionMapperImpl;
 import by.toukach.walletservice.repository.TransactionRepository;
-import by.toukach.walletservice.service.impl.TransactionServiceImpl;
+import by.toukach.walletservice.service.transaction.impl.TransactionServiceImpl;
+import by.toukach.walletservice.service.user.UserService;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Optional;
@@ -39,24 +41,27 @@ public class TransactionServiceTest extends BaseTest {
   @Mock
   private TransactionMapperImpl transactionMapper;
   private TransactionDto transactionDto;
+  private CreateTransactionDto createTransactionDto;
   private Transaction transaction;
 
   @BeforeEach
   public void setUp() throws NoSuchMethodException, InvocationTargetException,
       InstantiationException, IllegalAccessException {
     transactionDto = getCreditTransactionDto();
+    createTransactionDto = getCreditCreateTransactionDto();
     transaction = getTransaction();
   }
 
   @Test
   @DisplayName("Тест создания транзакции в приложении")
   public void createTransactionTest_should_CreateTransaction() {
-    when(transactionMapper.transactionDtoToTransaction(transactionDto)).thenReturn(transaction);
+    when(transactionMapper.createTransactionDtoToTransaction(createTransactionDto))
+        .thenReturn(transaction);
     when(transactionRepository.createTransaction(any())).thenReturn(transaction);
     when(transactionMapper.transactionToTransactionDto(transaction)).thenReturn(transactionDto);
 
     TransactionDto expectedResult = transactionDto;
-    TransactionDto actualResult = transactionService.createTransaction(transactionDto);
+    TransactionDto actualResult = transactionService.createTransaction(createTransactionDto);
 
     assertThat(actualResult).isEqualTo(expectedResult);
   }

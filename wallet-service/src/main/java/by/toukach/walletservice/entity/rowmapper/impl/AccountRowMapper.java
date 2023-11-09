@@ -1,10 +1,10 @@
 package by.toukach.walletservice.entity.rowmapper.impl;
 
 import by.toukach.walletservice.entity.Account;
-import by.toukach.walletservice.entity.rowmapper.RowMapper;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 
 /**
@@ -20,7 +20,7 @@ public class AccountRowMapper implements RowMapper<Account> {
   private static final String USER_ID = "user_id";
 
   @Override
-  public Account mapRow(ResultSet resultSet) throws SQLException {
+  public Account mapRow(ResultSet resultSet, int rowNum) throws SQLException {
     return Account.builder()
         .id(resultSet.getLong(ID))
         .createdAt(resultSet.getObject(CREATED_AT, LocalDateTime.class))

@@ -9,9 +9,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import by.toukach.walletservice.BaseTest;
 import by.toukach.walletservice.UserDetailsArgumentResolver;
-import by.toukach.walletservice.config.MainWebAppInitializer;
 import by.toukach.walletservice.dto.AccountDto;
-import by.toukach.walletservice.service.AccountService;
+import by.toukach.walletservice.dto.CreateAccountDto;
+import by.toukach.walletservice.service.account.AccountService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,29 +20,31 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 @ExtendWith({SpringExtension.class, MockitoExtension.class})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-@SpringJUnitWebConfig(classes = {MainWebAppInitializer.class})
+@AutoConfigureMockMvc
+@ActiveProfiles("test")
 public class AccountControllerTest extends BaseTest {
 
   private MockMvc mockMvc;
   @Mock
   private AccountService accountService;
   private AccountDto createdAccountDto;
-  private AccountDto newAccountDto;
+  private CreateAccountDto createAccountDto;
 
   @BeforeEach
   public void setUp() throws Exception {
     createdAccountDto = getCreatedAccountDto();
-    newAccountDto = getNewAccountDto();
+    createAccountDto = getCreateAccountDto();
 
     mockMvc = MockMvcBuilders.standaloneSetup(new AccountController(accountService))
         .setCustomArgumentResolvers(new UserDetailsArgumentResolver())
@@ -88,7 +90,7 @@ public class AccountControllerTest extends BaseTest {
   @Test
   @DisplayName("Тест создания счета")
   public void createAccountTest_should_CreateAccount() throws Exception {
-    when(accountService.createAccount(newAccountDto)).thenReturn(createdAccountDto);
+    when(accountService.createAccount(createAccountDto)).thenReturn(createdAccountDto);
 
     String accountJson = readJsonFile(CREATE_ACCOUNT_FILE_PATH);
 

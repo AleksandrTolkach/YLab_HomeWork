@@ -1,7 +1,7 @@
 package by.toukach.walletservice.controller.in.rest;
 
-import by.toukach.walletservice.dto.LogDto;
-import by.toukach.walletservice.service.LoggerService;
+import by.toukach.logger.dto.LogDto;
+import by.toukach.walletservice.service.audit.AuditService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class AdminController {
 
-  private final LoggerService loggerService;
+  private final AuditService auditService;
 
   /**
    * Метод для работы с запросом на вывод логов приложения.
@@ -31,6 +31,6 @@ public class AdminController {
   @ResponseStatus(HttpStatus.OK)
   @PreAuthorize("hasRole('ADMIN')")
   public List<LogDto> findLogs() {
-    return loggerService.findLogs();
+    return auditService.findLogs();
   }
 }

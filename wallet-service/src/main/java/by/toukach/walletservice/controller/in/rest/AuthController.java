@@ -4,7 +4,7 @@ import by.toukach.walletservice.dto.LogInDto;
 import by.toukach.walletservice.dto.LogInResponseDto;
 import by.toukach.walletservice.dto.SignUpDto;
 import by.toukach.walletservice.dto.UserDto;
-import by.toukach.walletservice.service.AuthService;
+import by.toukach.walletservice.service.auth.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;

@@ -9,6 +9,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 
 public class UserDetailsArgumentResolver extends BaseTest
     implements HandlerMethodArgumentResolver {
+
   @Override
   public boolean supportsParameter(MethodParameter parameter) {
     return parameter.getParameterType().isAssignableFrom(UserDetailsImpl.class);

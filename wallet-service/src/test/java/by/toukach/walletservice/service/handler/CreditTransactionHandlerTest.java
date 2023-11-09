@@ -8,15 +8,16 @@ import static org.mockito.Mockito.when;
 
 import by.toukach.walletservice.BaseTest;
 import by.toukach.walletservice.dto.AccountDto;
+import by.toukach.walletservice.dto.CreateTransactionDto;
 import by.toukach.walletservice.dto.TransactionDto;
 import by.toukach.walletservice.dto.UserDto;
 import by.toukach.walletservice.enumiration.TransactionType;
 import by.toukach.walletservice.exception.ArgumentValueException;
 import by.toukach.walletservice.exception.EntityDuplicateException;
 import by.toukach.walletservice.exception.EntityNotFoundException;
-import by.toukach.walletservice.service.AccountService;
-import by.toukach.walletservice.service.TransactionService;
-import by.toukach.walletservice.service.handler.impl.CreditTransactionHandler;
+import by.toukach.walletservice.service.account.AccountService;
+import by.toukach.walletservice.service.transaction.TransactionService;
+import by.toukach.walletservice.service.transaction.impl.CreditTransactionHandler;
 import by.toukach.walletservice.validator.Validator;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
@@ -30,7 +31,6 @@ import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -54,6 +54,7 @@ public class CreditTransactionHandlerTest extends BaseTest {
   @Mock
   private Authentication authentication;
   private TransactionDto transactionDto;
+  private CreateTransactionDto createTransactionDto;
   private AccountDto accountDto;
   private UserDto userDto;
   private UserDetails userDetails;
@@ -63,6 +64,7 @@ public class CreditTransactionHandlerTest extends BaseTest {
     securityContextHolderMockedStatic = mockStatic(SecurityContextHolder.class);
 
     transactionDto = getCreditTransactionDto();
+    createTransactionDto = getCreditCreateTransactionDto();
     accountDto = getCreatedAccountDto();
     userDto = getCreatedUserDto();
     userDto.setAccountList(List.of(accountDto));
@@ -83,11 +85,11 @@ public class CreditTransactionHandlerTest extends BaseTest {
         .thenReturn(securityContext);
     when(securityContext.getAuthentication()).thenReturn(authentication);
     when(authentication.getPrincipal()).thenReturn(userDetails);
-    when(transactionService.createTransaction(transactionDto)).thenReturn(transactionDto);
+    when(transactionService.createTransaction(createTransactionDto)).thenReturn(transactionDto);
     when(accountService.updateAccount(accountDto)).thenReturn(accountDto);
 
     TransactionDto expectedResult = transactionDto;
-    TransactionDto actualResult = creditTransactionHandler.handle(transactionDto);
+    TransactionDto actualResult = creditTransactionHandler.handle(createTransactionDto);
 
     assertThat(actualResult).isEqualTo(expectedResult);
   }
@@ -97,7 +99,7 @@ public class CreditTransactionHandlerTest extends BaseTest {
   public void handleTest_should_ThrowError_WhenAccountNotExist() {
     when(accountService.findAccountById(ACCOUNT_ID)).thenThrow(EntityNotFoundException.class);
 
-    assertThatThrownBy(() -> creditTransactionHandler.handle(transactionDto))
+    assertThatThrownBy(() -> creditTransactionHandler.handle(createTransactionDto))
         .isInstanceOf(EntityNotFoundException.class);
   }
 
@@ -109,25 +111,25 @@ public class CreditTransactionHandlerTest extends BaseTest {
         .thenReturn(securityContext);
     when(securityContext.getAuthentication()).thenReturn(authentication);
     when(authentication.getPrincipal()).thenReturn(userDetails);
-    when(transactionService.createTransaction(transactionDto))
+    when(transactionService.createTransaction(createTransactionDto))
         .thenThrow(EntityDuplicateException.class);
 
-    assertThatThrownBy(() -> creditTransactionHandler.handle(transactionDto))
+    assertThatThrownBy(() -> creditTransactionHandler.handle(createTransactionDto))
         .isInstanceOf(EntityDuplicateException.class);
   }
 
   @Test
   @DisplayName("Тест обработки кредитной транзакции с отрицательным значением суммы транзакции")
   public void handleTest_should_ThrowError_WhenPresentsNegativeArgument() {
-    transactionDto.setValue(NEGATIVE_TRANSACTION_VALUE);
+    createTransactionDto.setValue(NEGATIVE_TRANSACTION_VALUE);
 
     when(accountService.findAccountById(ACCOUNT_ID)).thenReturn(accountDto);
     securityContextHolderMockedStatic.when(SecurityContextHolder::getContext)
         .thenReturn(securityContext);
     when(securityContext.getAuthentication()).thenReturn(authentication);
     when(authentication.getPrincipal()).thenReturn(userDetails);
-    when(transactionService.createTransaction(transactionDto)).thenReturn(transactionDto);
-    assertThatThrownBy(() -> creditTransactionHandler.handle(transactionDto))
+    when(transactionService.createTransaction(createTransactionDto)).thenReturn(transactionDto);
+    assertThatThrownBy(() -> creditTransactionHandler.handle(createTransactionDto))
         .isInstanceOf(ArgumentValueException.class);
   }
 

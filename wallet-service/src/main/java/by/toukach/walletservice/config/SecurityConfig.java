@@ -10,6 +10,8 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer.FrameOptionsConfig;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -17,9 +19,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.context.AbstractSecurityWebApplicationInitializer;
-import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
-import org.springframework.security.web.context.SecurityContextRepository;
 
 /**
  * Конфигурационный класс для настройки безопасности приложения.
@@ -32,15 +31,20 @@ public class SecurityConfig {
 
   private static final String LOG_IN_PATH = "/auth/login";
   private static final String SIGN_UP_PATH = "/auth/sign-up";
-  private static final String SWAGGER_PATH = "/swagger**";
+  private static final String[] OPEN_API_PATH = new String[]{
+      "/v3/api-docs/**",
+      "/swagger-ui/**",
+      "/v2/api-docs/**",
+      "/swagger-resources/**"
+  };
 
   private final UserDetailsService userDetailsService;
   private final AuthenticationEntryPoint authenticationEntryPoint;
   private final JwtTokenFilter jwtTokenFilter;
 
   /**
-   * Метод для создания бина AuthenticationProvider,
-   * который использует пользователей из БД для аутентификации.
+   * Метод для создания бина AuthenticationProvider, который использует пользователей из БД для
+   * аутентификации.
    *
    * @return запрашиваемый AuthenticationProvide.
    */
@@ -84,19 +88,24 @@ public class SecurityConfig {
    */
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-    http.cors().and()
-        .csrf().disable()
-        .exceptionHandling().authenticationEntryPoint(authenticationEntryPoint).and()
-        .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-        .authorizeHttpRequests()
-        .requestMatchers(SWAGGER_PATH).permitAll()
-        .requestMatchers(LOG_IN_PATH).permitAll()
-        .requestMatchers(SIGN_UP_PATH).permitAll()
-        .anyRequest().authenticated();
-
-    http.headers().frameOptions().sameOrigin();
-    http.authenticationProvider(daoAuthenticationProvider());
-    http.addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
+    http
+        .cors(AbstractHttpConfigurer::disable)
+        .csrf(AbstractHttpConfigurer::disable)
+        .sessionManagement(configurer ->
+            configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .exceptionHandling(configurer ->
+            configurer.authenticationEntryPoint(authenticationEntryPoint)
+        )
+        .authorizeHttpRequests(registry ->
+                registry
+                    .requestMatchers(OPEN_API_PATH).permitAll()
+                    .requestMatchers(LOG_IN_PATH).permitAll()
+                    .requestMatchers(SIGN_UP_PATH).permitAll()
+                    .anyRequest().authenticated()
+        )
+        .headers(configurer -> configurer.frameOptions(FrameOptionsConfig::sameOrigin))
+        .authenticationProvider(daoAuthenticationProvider())
+        .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
 
     return http.build();
   }

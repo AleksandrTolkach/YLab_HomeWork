@@ -2,7 +2,6 @@ package by.toukach.walletservice.entity.rowmapper.impl;
 
 import by.toukach.walletservice.entity.Account;
 import by.toukach.walletservice.entity.User;
-import by.toukach.walletservice.entity.rowmapper.RowMapper;
 import by.toukach.walletservice.enumiration.UserRole;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -10,6 +9,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 
 /**
@@ -28,7 +28,7 @@ public class UserRowMapper implements RowMapper<User> {
   private final RowMapper<Account> accountRowMapper;
 
   @Override
-  public User mapRow(ResultSet resultSet) throws SQLException {
+  public User mapRow(ResultSet resultSet, int rowNum) throws SQLException {
     User user = User.builder()
         .id(resultSet.getLong(ID))
         .createdAt(resultSet.getObject(CREATED_AT, LocalDateTime.class))
@@ -40,13 +40,13 @@ public class UserRowMapper implements RowMapper<User> {
     List<Account> accountList = new ArrayList<>();
     user.setAccountList(accountList);
 
-    Account account = accountRowMapper.mapRow(resultSet);
+    Account account = accountRowMapper.mapRow(resultSet, rowNum);
     if (account.getId() == 0) {
       return user;
     } else {
       accountList.add(account);
       while (resultSet.next()) {
-        accountList.add(accountRowMapper.mapRow(resultSet));
+        accountList.add(accountRowMapper.mapRow(resultSet, rowNum));
       }
     }
 
