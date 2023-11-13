@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5434/wallet
+    db-name: wallet
+    username: toukach
+    password: ylab
+    driver-class-name: org.postgresql.Driver
+    default-db-url: jdbc:postgresql://localhost:5434/toukach
+  liquibase:
+    change-log: classpath:db/migration/liquibase/changelog.xml
+    liquibase-schema: liquibase
+    enabled: true
+server:
+  servlet:
+    context-path: /api
+  port: 8081

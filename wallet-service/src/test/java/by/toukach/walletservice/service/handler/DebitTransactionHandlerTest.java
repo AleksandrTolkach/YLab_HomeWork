@@ -1,0 +1,164 @@
+package by.toukach.walletservice.service.handler;
+
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
+
+import by.toukach.walletservice.BaseTest;
+import by.toukach.walletservice.dto.AccountDto;
+import by.toukach.walletservice.dto.CreateTransactionDto;
+import by.toukach.walletservice.dto.TransactionDto;
+import by.toukach.walletservice.dto.UserDto;
+import by.toukach.walletservice.enumiration.TransactionType;
+import by.toukach.walletservice.exception.ArgumentValueException;
+import by.toukach.walletservice.exception.EntityDuplicateException;
+import by.toukach.walletservice.exception.EntityNotFoundException;
+import by.toukach.walletservice.exception.InsufficientFundsException;
+import by.toukach.walletservice.service.account.AccountService;
+import by.toukach.walletservice.service.transaction.TransactionService;
+import by.toukach.walletservice.service.transaction.impl.DebitTransactionHandler;
+import by.toukach.walletservice.validator.Validator;
+import java.util.List;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
+public class DebitTransactionHandlerTest extends BaseTest {
+
+  @InjectMocks
+  private DebitTransactionHandler debitTransactionHandler;
+  @Mock
+  private TransactionService transactionService;
+  @Mock
+  private AccountService accountService;
+  @Mock
+  private Validator<TransactionDto> transactionDtoValidator;
+  @Mock
+  private Validator<CreateTransactionDto> createTransactionDtoValidator;
+  private MockedStatic<SecurityContextHolder> securityContextHolderMockedStatic;
+  @Mock
+  private SecurityContext securityContext;
+  @Mock
+  private Authentication authentication;
+  private TransactionDto transactionDto;
+  private CreateTransactionDto createTransactionDto;
+  private AccountDto accountDto;
+  private UserDto userDto;
+  private UserDetails userDetails;
+
+  @BeforeEach
+  public void setUp() {
+    securityContextHolderMockedStatic = mockStatic(SecurityContextHolder.class);
+
+    transactionDto = getCreditTransactionDto();
+    createTransactionDto = getDebitCreateTransactionDto();
+    accountDto = getCreatedAccountDto();
+    userDto = getCreatedUserDto();
+    userDto.setAccountList(List.of(accountDto));
+    userDetails = getUserDetails();
+  }
+
+  @AfterEach
+  public void cleanUp() {
+    securityContextHolderMockedStatic.close();
+  }
+
+  @Test
+  @DisplayName("Тест обработки дебитной транзакции")
+  public void handleTest_should_HandleTransaction() {
+    doNothing().when(createTransactionDtoValidator).validate(createTransactionDto);
+    when(accountService.findAccountById(ACCOUNT_ID)).thenReturn(accountDto);
+    securityContextHolderMockedStatic.when(SecurityContextHolder::getContext)
+        .thenReturn(securityContext);
+    when(securityContext.getAuthentication()).thenReturn(authentication);
+    when(authentication.getPrincipal()).thenReturn(userDetails);
+    when(transactionService.createTransaction(createTransactionDto)).thenReturn(transactionDto);
+    when(accountService.updateAccount(accountDto)).thenReturn(accountDto);
+
+    TransactionDto expectedResult = transactionDto;
+    TransactionDto actualResult = debitTransactionHandler.handle(createTransactionDto);
+
+    assertThat(actualResult).isEqualTo(expectedResult);
+  }
+
+  @Test
+  @DisplayName("Тест обработки дебитной транзакции при недостатке средств на счете")
+  public void handleTest_should_ThrowError_WhenNegativeBalance() {
+    createTransactionDto.setValue(VALUE_BIG_AMOUNT);
+
+    when(accountService.findAccountById(ACCOUNT_ID)).thenReturn(accountDto);
+    securityContextHolderMockedStatic.when(SecurityContextHolder::getContext)
+        .thenReturn(securityContext);
+    when(securityContext.getAuthentication()).thenReturn(authentication);
+    when(authentication.getPrincipal()).thenReturn(userDetails);
+
+    assertThatThrownBy(() -> debitTransactionHandler.handle(createTransactionDto))
+        .isInstanceOf(InsufficientFundsException.class);
+  }
+
+  @Test
+  @DisplayName("Тест обработки дебитной транзакции для несуществующего счета")
+  public void handleTest_should_ThrowError_WhenAccountNotExist() {
+    when(accountService.findAccountById(ACCOUNT_ID)).thenThrow(EntityNotFoundException.class);
+
+    assertThatThrownBy(() -> debitTransactionHandler.handle(createTransactionDto))
+        .isInstanceOf(EntityNotFoundException.class);
+  }
+
+  @Test
+  @DisplayName("Тест обработки дебитной транзакции с дублирующим ID")
+  public void handleTest_should_ThrowError_WhenTransactionExists() {
+    when(accountService.findAccountById(ACCOUNT_ID)).thenReturn(accountDto);
+    securityContextHolderMockedStatic.when(SecurityContextHolder::getContext)
+        .thenReturn(securityContext);
+    when(securityContext.getAuthentication()).thenReturn(authentication);
+    when(authentication.getPrincipal()).thenReturn(userDetails);
+    when(transactionService.createTransaction(createTransactionDto))
+        .thenThrow(EntityDuplicateException.class);
+
+    assertThatThrownBy(() -> debitTransactionHandler.handle(createTransactionDto))
+        .isInstanceOf(EntityDuplicateException.class);
+  }
+
+  @Test
+  @DisplayName("Тест обработки дебитной транзакции с отрицательным значением суммы транзакции")
+  public void handleTest_should_ThrowError_WhenPresentsNegativeArgument() {
+    createTransactionDto.setValue(NEGATIVE_TRANSACTION_VALUE);
+
+    when(accountService.findAccountById(ACCOUNT_ID)).thenReturn(accountDto);
+    securityContextHolderMockedStatic.when(SecurityContextHolder::getContext)
+        .thenReturn(securityContext);
+    when(securityContext.getAuthentication()).thenReturn(authentication);
+    when(authentication.getPrincipal()).thenReturn(userDetails);
+    when(transactionService.createTransaction(createTransactionDto)).thenReturn(transactionDto);
+
+    assertThatThrownBy(() -> debitTransactionHandler.handle(createTransactionDto))
+        .isInstanceOf(ArgumentValueException.class);
+  }
+
+  @Test
+  @DisplayName("Тест вывода типа обработчика транзакций")
+  public void typeTest_should_ReturnType() {
+    TransactionType expectedResult = TransactionType.DEBIT;
+    TransactionType actualResult = debitTransactionHandler.type();
+
+    assertThat(actualResult).isEqualTo(expectedResult);
+  }
+}

@@ -1,0 +1,2 @@
+CREATE SCHEMA application AUTHORIZATION "toukach";
+CREATE SCHEMA liquibase AUTHORIZATION "toukach";
