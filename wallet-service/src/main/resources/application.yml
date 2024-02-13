@@ -1,4 +1,12 @@
 spring:
+  jmx:
+    enabled: true
+  application:
+    name: homeWork
+  boot:
+    admin:
+      client:
+        url: http://localhost:9000
   datasource:
     url: jdbc:postgresql://localhost:5434/wallet
     db-name: wallet
@@ -14,3 +22,18 @@ server:
   servlet:
     context-path: /api
   port: 8081
+management:
+  endpoints:
+    web:
+      base-path: /admin
+      exposure:
+        include: '*'
+    jmx:
+      exposure:
+        include: '*'
+  endpoint:
+    health:
+      showDetails: always
+  health:
+    probes:
+      enabled: true

@@ -31,6 +31,8 @@ public class SecurityConfig {
 
   private static final String LOG_IN_PATH = "/auth/login";
   private static final String SIGN_UP_PATH = "/auth/sign-up";
+  private static final String ADMIN_PATH = "/admin";
+  private static final String ADMIN_MORE_PATH = "/admin/**";
   private static final String[] OPEN_API_PATH = new String[]{
       "/v3/api-docs/**",
       "/swagger-ui/**",
@@ -101,6 +103,8 @@ public class SecurityConfig {
                     .requestMatchers(OPEN_API_PATH).permitAll()
                     .requestMatchers(LOG_IN_PATH).permitAll()
                     .requestMatchers(SIGN_UP_PATH).permitAll()
+                    .requestMatchers(ADMIN_PATH).permitAll()
+                    .requestMatchers(ADMIN_MORE_PATH).permitAll()
                     .anyRequest().authenticated()
         )
         .headers(configurer -> configurer.frameOptions(FrameOptionsConfig::sameOrigin))
